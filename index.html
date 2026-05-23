@@ -70,7 +70,7 @@
             z-index: 3;
             cursor: pointer;
             transition: opacity 0.3s, transform 0.2s;
-            pointer-events: none; /* الأكشن بيحصل بالضغط على الحاوية نفسها */
+            pointer-events: none;
         }
 
         /* أزرار التفاعل الجانبية */
@@ -161,19 +161,19 @@
 <body>
 
     <div class="phone-container" id="videoContainer">
-        <!-- 1. مشغل الفيديو الحقيقي (رابط مباشر لفيديو طولي شغال) -->
-        <video class="video-player" id="myVideo" loop playsinline>
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-vertical-shot-of-a-woman-neon-light-41584-large.mp4" type="video/mp4">
+        <!-- مشغل الفيديو الحقيقي برابط مباشر سريع ودعم التشغيل الصامت المؤقت ومكرر تلقائياً -->
+        <video class="video-player" id="myVideo" loop playsinline muted>
+            <source src="https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0ee273d1e8d6a134cbc366ad4e2079a&profile_id=165&oauth2_token_id=57447761" type="video/mp4">
             متصفحك لا يدعم تشغيل الفيديو.
         </video>
 
-        <!-- طبقة التظليل -->
+        <!-- طبقة التظليل الخارجي للجماليات -->
         <div class="overlay"></div>
 
-        <!-- زر التشغيل المؤقت -->
+        <!-- زر التشغيل في المنتصف -->
         <i class="fas fa-play play-overlay-btn" id="playIcon"></i>
 
-        <!-- أزرار التفاعل الجانبية -->
+        <!-- أزرار التفاعل الجانبية يمين الشاشة -->
         <div class="side-buttons">
             <div class="action-item" onclick="toggleLike(this)">
                 <i class="fas fa-heart"></i>
@@ -192,14 +192,14 @@
             </div>
         </div>
 
-        <!-- تفاصيل الفيديو -->
+        <!-- تفاصيل وصنف الفيديو أسفل الشاشة -->
         <div class="video-details">
             <div class="username">@iStar_Premium</div>
             <div class="description">شاهد الحلقة الأولى من مسلسل "الهروب الكبير" الحصري! اضغط على الشاشة للتشغيل والإيقاف 🪙✨ #drama #shorts</div>
         </div>
     </div>
 
-    <!-- كود الـ JavaScript (المشغل الفعلي للحركة) -->
+    <!-- كود التحكم بالتشغيل والـ Logic التفاعلي -->
     <script>
         const video = document.getElementById('myVideo');
         const container = document.getElementById('videoContainer');
@@ -207,15 +207,17 @@
 
         // كود تشغيل وإيقاف الفيديو بالضغط على الشاشة
         container.addEventListener('click', function(e) {
-            // نتأكد إن الضغطة مش على أزرار التفاعل الجانبية
+            // نتأكد إن الضغطة مش على أزرار التفاعل الجانبية عشان ميعملش تداخل
             if(e.target.closest('.side-buttons')) return;
 
             if (video.paused) {
+                // إلغاء كتم الصوت عند أول ضغطة حقيقية للمستخدم لتفعيل الصوت
+                video.muted = false; 
                 video.play();
-                playIcon.style.opacity = '0'; // إخفاء زر التشغيل لما يشتغل
+                playIcon.style.opacity = '0'; // إخفاء زر التشغيل
             } else {
                 video.pause();
-                playIcon.style.opacity = '1'; // إظهار الزر لما يقف
+                playIcon.style.opacity = '1'; // إظهار زر التشغيل
             }
         });
 
