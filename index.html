@@ -3,430 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iStar Premium UI</title>
+    <title>iStar Premium Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #080a10;
-            --card-bg: rgba(30, 35, 50, 0.4);
-            --accent-color: #ffc107;
-            --accent-gradient: linear-gradient(135deg, #ffdb4d, #ffb300);
+            --bg-dark: #0a0a0f;
+            --card-glass: rgba(26, 26, 31, 0.65);
+            --neon-purple: #6224d1;
+            --neon-blue: #00d1ff;
+            --accent-gold: #ffca28;
             --text-main: #ffffff;
-            --text-sub: #8a92a6;
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-sub: #a0a5b5;
+            --border-glass: rgba(255, 255, 255, 0.08);
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #030508;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-main);
-            overflow: hidden;
-        }
-
-        /* حاوية الموبايل البروفيشنال */
-        .phone-container {
-            width: 393px;
-            height: 852px;
-            background-color: var(--bg-color);
-            border-radius: 44px;
-            border: 10px solid #1e222b;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* شريط العملات العلوي الاحترافي (تأثير زجاجي) */
-        .top-balance-bar {
-            position: absolute;
-            top: 24px;
-            left: 20px;
-            z-index: 10;
-            background: rgba(15, 22, 36, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 8px 16px;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .top-balance-bar i {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 16px;
-        }
-        .balance-text { font-weight: 600; font-size: 13px; letter-spacing: 0.5px; }
-
-        /* الشاشات وحركات الانتقال */
-        .screen {
-            width: 100%;
-            height: calc(100% - 76px);
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            transform: scale(0.96);
-            pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            padding: 85px 20px 20px 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .active-screen {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-
-        /* شاشة الفيديوهات الرئيسية */
-        #videoScreen { padding: 0; background: #000; }
-        .video-placeholder {
-            width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.95) 100%), 
-                        url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-        }
-        .side-buttons {
-            position: absolute;
-            bottom: 30px;
-            right: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 22px;
-            z-index: 4;
-        }
-        .action-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .action-item .icon-wrapper {
-            width: 48px; height: 48px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(8px);
-            border-radius: 50%;
+            background-color: #030305;
             display: flex; justify-content: center; align-items: center;
-            margin-bottom: 6px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.2s;
+            min-height: 100vh; color: var(--text-main); overflow: hidden;
         }
-        .action-item:hover .icon-wrapper { background: rgba(255,255,255,0.2); }
-        .action-item i { font-size: 22px; }
-        .action-item span { font-size: 11px; font-weight: 500; color: var(--text-sub); }
-        .video-details { position: absolute; bottom: 35px; left: 20px; right: 85px; z-index: 4; text-align: right; }
-        .username { font-size: 16px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .username::after { content: '\f058'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: #1d9bf0; font-size: 14px; }
-        .description { font-size: 13px; color: #d1d5db; line-height: 1.5; }
 
-        /* شاشة الحلقات بروفيشنال */
-        .screen-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text-main); letter-spacing: 0.5px; }
-        .episode-list { display: flex; flex-direction: column; gap: 14px; }
-        
-        .episode-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            border: 1px solid var(--glass-border);
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+        /* شاسيه الموبايل الاحترافي */
+        .phone-container {
+            width: 393px; height: 852px;
+            background-color: var(--bg-dark);
+            border-radius: 44px; border: 10px solid #1e222b;
+            position: relative; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column;
         }
-        .episode-card:hover { background: rgba(40, 48, 68, 0.5); transform: translateY(-2px); }
-        
-        /* بوستر الحلقة المصغر */
-        .ep-thumbnail {
-            width: 75px; height: 75px;
-            border-radius: 12px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            flex-shrink: 0;
+
+        /* المحفظة العلوية الزجاجية الثابتة */
+        .wallet-hud {
+            position: absolute; top: 24px; left: 20px; z-index: 100;
+            background: rgba(15, 15, 20, 0.75); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); padding: 8px 16px;
+            border-radius: 24px; border: 1px solid var(--border-glass);
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        .ep-thumbnail i { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; color: rgba(255,255,255,0.8); }
+        .wallet-hud i { color: var(--accent-gold); font-size: 16px; }
+        .wallet-text { font-weight: 600; font-size: 13px; }
 
-        .episode-info { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-        .ep-title { font-weight: 600; font-size: 14px; line-height: 1.3; }
-        .ep-meta { font-size: 11px; color: var(--text-sub); display: flex; align-items: center; gap: 10px; }
-        
-        .status-badge {
-            padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
-            display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        /* شاشة العرض والأنيميشن */
+        .screen {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            opacity: 0; transform: scale(0.95); pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            padding: 85px 20px 90px 20px; overflow-y: auto;
+            display: flex; flex-direction: column;
         }
-        .status-free { background: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid rgba(129, 199, 132, 0.2); }
-        .status-locked { background: rgba(230, 81, 0, 0.2); color: #ffb74d; border: 1px solid rgba(255, 183, 77, 0.2); }
-        .status-unlocked { background: rgba(2, 136, 209, 0.2); color: #4fc3f7; border: 1px solid rgba(79, 195, 247, 0.2); }
+        .active-screen { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        /* شاشة المتجر الفخمة */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .coin-card {
-            background: var(--card-bg); border-radius: 22px; padding: 24px 16px; text-align: center;
-            border: 1px solid var(--glass-border); cursor: pointer; position: relative;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-        }
-        .coin-card:hover { transform: translateY(-4px); border-color: var(--accent-color); box-shadow: 0 8px 25px rgba(255, 193, 7, 0.1); }
-        .coin-card i { font-size: 34px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
-        .coin-amount { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
-        .coin-price { display: block; background: var(--accent-gradient); color: #05070a; padding: 6px 14px; border-radius: 14px; font-size: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(255,193,7,0.2); }
-        .popular-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #e65100; color: #fff; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* شاشة البروفايل الاحترافية */
-        .profile-container-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
-        .profile-avatar { width: 84px; height: 84px; background: var(--card-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 32px; color: var(--accent-color); margin-bottom: 14px; }
-        .profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-        .profile-tag { font-size: 12px; color: var(--text-sub); margin-bottom: 24px; }
-        .profile-stats { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .stat-row { background: var(--card-bg); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass-border); }
-        .stat-label { color: var(--text-sub); font-size: 13px; display: flex; align-items: center; gap: 10px; }
-        .stat-label i { font-size: 16px; }
-        .stat-value { font-weight: 600; font-size: 14px; }
-
-        /* شريط التنقل السفلي الاحترافي (تأثير زجاجي) */
+        /* شريط التنقل السفلي الاحترافي */
         .bottom-nav {
-            height: 76px;
-            background: rgba(15, 22, 36, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            position: absolute;
-            bottom: 0; width: 100%; z-index: 10;
-            padding-bottom: 12px; /* مساحة لنوتش الايفون السفلي */
+            height: 76px; background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-glass);
+            display: flex; justify-content: space-around; align-items: center;
+            position: absolute; bottom: 0; width: 100%; z-index: 90; padding-bottom: 12px;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #62697a; cursor: pointer; font-size: 11px; font-weight: 500; gap: 5px; transition: color 0.2s, transform 0.2s; }
-        .nav-item.active { color: var(--accent-color); transform: scale(1.05); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #525966; cursor: pointer; font-size: 11px; font-weight: 500; gap: 4px; transition: color 0.2s; }
+        .nav-item.active { color: var(--neon-blue); }
         .nav-item i { font-size: 19px; }
+
+        /* تصفيف العناصر المخصصة لأكوادك */
+        .main-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .glass-card { background: var(--card-glass); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--border-glass); padding: 16px; margin-bottom: 15px; }
+
+        /* 1. Onboarding Vibes */
+        .vibe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .vibe-chip { padding: 14px; background: rgba(255,255,255,0.05); border-radius: 14px; text-align: center; border: 1px solid var(--border-glass); cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+        .vibe-chip.selected { background: var(--neon-purple); border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(98, 36, 209, 0.4); }
+
+        /* 2. Video Feed Custom Style */
+        #feedScreen { padding: 0; background: #000; }
+        .feed-video-bg { width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.95) 100%), url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?q=80&w=1974&auto=format&fit=crop'); background-size: cover; background-position: center; }
+        .feed-side-actions { position: absolute; bottom: 110px; right: 16px; display: flex; flex-direction: column; gap: 20px; z-index: 5; }
+        .feed-action { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .feed-action .circle-btn { width: 46px; height: 46px; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .feed-action span { font-size: 11px; color: var(--text-sub); font-weight: 600; }
+        .feed-details { position: absolute; bottom: 110px; left: 20px; right: 80px; z-index: 5; text-align: right; }
+
+        /* 3. Discovery & Series Cards */
+        .showcase-poster { width: 100%; height: 180px; border-radius: 16px; background-size: cover; background-position: center; margin-bottom: 12px; position: relative; }
+        .poster-overlay { position: absolute; bottom: 0; width: 100%; padding: 15px; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.9)); border-radius: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .grid-shows { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .show-card { background: var(--card-glass); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-glass); cursor: pointer; }
+        .show-thumb { width: 100%; height: 130px; background-size: cover; background-position: center; }
+        .show-info { padding: 10px; }
+        .show-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 4. Rewards Center & Check-in */
+        .checkin-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; }
+        .day-box { flex: 0 0 48px; height: 65px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 11px; border: 1px solid var(--border-glass); }
+        .day-box.claimed { background: rgba(0, 209, 255, 0.15); border-color: var(--neon-blue); color: var(--neon-blue); }
+        .day-box.active { background: var(--accent-gold); color: #000; font-weight: bold; box-shadow: 0 0 10px rgba(255,202,40,0.4); }
+
+        /* 5. Coin Packages */
+        .pack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .pack-card { background: var(--card-glass); border-radius: 18px; padding: 16px; text-align: center; border: 1px solid var(--border-glass); cursor: pointer; position: relative; transition: transform 0.2s; }
+        .pack-card:hover { transform: scale(1.03); border-color: var(--accent-gold); }
+        .pack-card i { font-size: 28px; color: var(--accent-gold); margin-bottom: 8px; }
+        .pack-amount { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .pack-bonus { font-size: 10px; color: var(--neon-blue); margin-bottom: 10px; font-weight: 600; }
+        .pack-price { display: block; background: var(--accent-gold); color: #000; padding: 5px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+        .tag-popular { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: red; color: #fff; font-size: 8px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+
+        /* 6. Paywall Option Rows */
+        .paywall-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
+        .paywall-option.selected { border-color: var(--neon-blue); background: rgba(0, 209, 255, 0.05); }
+        
+        /* أزرار بروفيشنال موحدة */
+        .btn-prime { background: linear-gradient(90deg, var(--neon-purple), #8621a6); color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; cursor: pointer; border: none; width: 100%; margin-top: 10px; box-shadow: 0 4px 15px rgba(98, 36, 209, 0.4); }
+        .btn-ghost { background: transparent; color: var(--text-sub); padding: 10px; text-align: center; font-size: 13px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="phone-container">
         
-        <!-- الرصيد العلوي الزجاجي -->
-        <div class="top-balance-bar">
+        <!-- المحفظة العلوية الذكية -->
+        <div class="wallet-hud">
             <i class="fas fa-coins"></i>
-            <span class="balance-text">رصيدك: <span id="userBalance">0</span> عملة</span>
+            <span class="wallet-text">رصيدك: <span id="coinCountHUD">1,250</span> عملة</span>
         </div>
 
-        <!-- الشاشة 1: الرئيسية -->
-        <div class="screen active-screen" id="videoScreen">
-            <div class="video-placeholder"></div>
+        <!-- 1. شاشة الـ Onboarding (اختيار الميول) -->
+        <div class="screen active-screen" id="onboardingScreen" style="padding-top: 120px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="width: 70px; height: 70px; background: var(--neon-purple); border-radius: 20px; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 0 20px var(--neon-purple);"><i class="fas fa-play" style="font-size: 28px;"></i></div>
+                <h2 class="main-title" style="margin-bottom: 5px;">i Star</h2>
+                <p style="color: var(--text-sub); font-size: 14px;">Watch. Unlock. Earn.</p>
+            </div>
+            <div class="glass-card" style="margin-top: auto;">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Pick your vibes</h3>
+                <p style="color: var(--text-sub); font-size: 12px; margin-bottom: 15px;">We'll customize your feed based on what you love.</p>
+                <div class="vibe-grid">
+                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Romance</div>
+                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Thriller</div>
+                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Sci-Fi</div>
+                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Comedy</div>
+                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Drama</div>
+                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Action</div>
+                </div>
+                <button class="btn-prime" style="margin-top: 25px;" onclick="switchInternalScreen('feedScreen', 0)">Start Watching</button>
+                <div class="btn-ghost" onclick="switchInternalScreen('discoveryScreen', 1)">I already have an account</div>
+            </div>
+        </div>
+
+        <!-- 2. شاشة الـ Home Video Feed -->
+        <div class="screen" id="feedScreen">
+            <div class="feed-video-bg"></div>
+            <!-- الأزرار الجانبية للتفاعل -->
+            <div class="feed-side-actions">
+                <div class="feed-action" onclick="toggleFeedLike()">
+                    <div class="circle-btn"><i class="fas fa-heart" id="feedHeart" style="color:#fff;"></i></div>
+                    <span id="feedLikeCount">1.2M</span>
+                </div>
+                <div class="feed-action">
+                    <div class="circle-btn"><i class="fas fa-comment-dots"></i></div>
+                    <span>45.8K</span>
+                </div>
+                <div class="feed-action" onclick="switchInternalScreen('paywallScreen', -1)">
+                    <div class="circle-btn" style="background: var(--accent-gold);"><i class="fas fa-lock" style="color:#000; font-size:16px;"></i></div>
+                    <span style="color:var(--accent-gold);">Ep. 12</span>
+                </div>
+            </div>
+            <!-- تفاصيل الفيديو أسفل اليسار -->
+            <div class="feed-details">
+                <h4 class="username">@alex_vfx_creator</h4>
+                <p class="description">The neon city never sleeps. Part 11 of the Cyberpunk Saga is finally here! #scifi #neon #shortfilm</p>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; color:var(--text-sub);"><i class="fas fa-music"></i> <span>Original Sound - Alex VFX</span></div>
+            </div>
+        </div>
+
+        <!-- 3. شاشة الـ Discovery -->
+        <div class="screen" id="discoveryScreen">
+            <h2 class="main-title">Discover</h2>
+            <!-- البوستر الكبير المميز المصمم بأكوادك -->
+            <div class="showcase-poster" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop');">
+                <div class="poster-overlay">
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700;">The Billionaire's Secret Heir</h3>
+                        <p style="color: var(--text-sub); font-size: 11px;">Trending Drama · Season 1</p>
+                    </div>
+                    <button class="btn-prime" style="width:auto; padding: 6px 16px; margin:0; font-size:12px; border-radius:8px;" onclick="switchInternalScreen('paywallScreen', -1)">Watch Now</button>
+                </div>
+            </div>
             
-            <div class="side-buttons">
-                <div class="action-item" onclick="toggleLike(this)">
-                    <div class="icon-wrapper"><i class="fas fa-heart" id="heartIcon" style="color: #fff;"></i></div>
-                    <span id="likeCount">2.4K</span>
+            <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--text-sub);">Trending Now</h4>
+            <div class="grid-shows">
+                <div class="show-card" onclick="switchInternalScreen('paywallScreen', -1)">
+                    <div class="show-thumb" style="background-image: url('https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=300&auto=format&fit=crop');"></div>
+                    <div class="show-info"><div class="show-title">Love in the Fast Lane</div><p style="font-size:10px; color:var(--neon-blue);">52 Episodes</p></div>
                 </div>
-                <div class="action-item">
-                    <div class="icon-wrapper"><i class="fas fa-comment-dots"></i></div>
-                    <span>142</span>
-                </div>
-            </div>
-
-            <div class="video-details">
-                <div class="username">@iStar_Premium</div>
-                <div class="description">جرب التصميم الاحترافي الجديد الواجهة زجاجية بالكامل والتنقل ناعم جداً! 🎬✨</div>
-            </div>
-        </div>
-
-        <!-- الشاشة 2: الحلقات -->
-        <div class="screen" id="episodesScreen">
-            <div class="screen-title">حلقات المسلسل 🎬</div>
-            <div class="episode-list">
-                
-                <div class="episode-card" onclick="playEpisode(1, 0)">
-                    <div class="ep-thumbnail" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=100&auto=format&fit=crop');">
-                        <i class="fas fa-play"></i>
-                    </div>
-                    <div class="episode-info">
-                        <span class="ep-title">الحلقة 1: البداية الغامضة</span>
-                        <div class="ep-meta"><span>⏱️ 2:15 د</span><span>👁️ 12K</span></div>
-                    </div>
-                    <span class="status-badge status-free">مجانية</span>
-                </div>
-
-                <div class="episode-card" id="ep2-card" onclick="playEpisode(2, 20)">
-                    <div class="ep-thumbnail" style="background-image: url('https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=100&auto=format&fit=crop');">
-                        <i class="fas fa-lock" id="lockIcon2"></i>
-                    </div>
-                    <div class="episode-info">
-                        <span class="ep-title">الحلقة 2: المواجهة الأولى</span>
-                        <div class="ep-meta"><span>⏱️ 1:45 د</span><span>  مغلقة</span></div>
-                    </div>
-                    <span class="status-badge status-locked" id="ep2-status">
-                         20 عملة
-                    </span>
-                </div>
-
-                <div class="episode-card" id="ep3-card" onclick="playEpisode(3, 50)">
-                    <div class="ep-thumbnail" style="background-image: url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=100&auto=format&fit=crop');">
-                        <i class="fas fa-lock" id="lockIcon3"></i>
-                    </div>
-                    <div class="episode-info">
-                        <span class="ep-title">الحلقة 3: نهاية اللعبة</span>
-                        <div class="ep-meta"><span>⏱️ 3:00 د</span><span>  مغلقة</span></div>
-                    </div>
-                    <span class="status-badge status-locked" id="ep3-status">
-                         50 عملة
-                    </span>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- الشاشة 3: المتجر -->
-        <div class="screen" id="shopScreen">
-            <div class="screen-title">متجر العملات 🪙</div>
-            <div class="shop-grid">
-                <div class="coin-card" onclick="buyCoins(50, 10)">
-                    <i class="fas fa-coins"></i>
-                    <div class="coin-amount">50 عملة</div>
-                    <span class="coin-price">10 جنيه</span>
-                </div>
-
-                <div class="coin-card" onclick="buyCoins(150, 25)">
-                    <div class="popular-tag">الأكثر طلباً</div>
-                    <i class="fas fa-box-open"></i>
-                    <div class="coin-amount">150 عملة</div>
-                    <span class="coin-price">25 جنيه</span>
-                </div>
-
-                <div class="coin-card" onclick="buyCoins(400, 60)">
-                    <i class="fas fa-bolt"></i>
-                    <div class="coin-amount">400 عملة</div>
-                    <span class="coin-price">60 جنيه</span>
-                </div>
-
-                <div class="coin-card" onclick="buyCoins(1000, 120)">
-                    <i class="fas fa-crown"></i>
-                    <div class="coin-amount">1000 عملة</div>
-                    <span class="coin-price">120 جنيه</span>
+                <div class="show-card" onclick="switchInternalScreen('paywallScreen', -1)">
+                    <div class="show-thumb" style="background-image: url('https://images.unsplash.com/photo-1509281373149-e957c6296406?q=80&w=300&auto=format&fit=crop');"></div>
+                    <div class="show-info"><div class="show-title">Shadow of the Mafia</div><p style="font-size:10px; color:var(--text-sub);">80 Episodes</p></div>
                 </div>
             </div>
         </div>
 
-        <!-- الشاشة 4: الحساب الشخصي -->
-        <div class="screen" id="profileScreen">
-            <div class="screen-title">حسابي 👤</div>
-            <div class="profile-container-box">
-                <div class="profile-avatar"><i class="fas fa-user-shield"></i></div>
-                <div class="profile-name">يوسف محمد</div>
-                <div class="profile-tag">الحساب الذهبي #94820</div>
-                
-                <div class="profile-stats">
-                    <div class="stat-row">
-                        <span class="stat-label"><i class="fas fa-wallet" style="color: #4caf50;"></i> رصيدك الحالي</span>
-                        <span class="stat-value" style="color: var(--accent-color);"><span id="profileBalance">0</span> عملة</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label"><i class="fas fa-unlock" style="color: #2196f3;"></i> الحلقات المفتوحة</span>
-                        <span class="stat-value" id="unlockedCount">1 حلقة</span>
-                    </div>
+        <!-- 4. شاشة مركز المكافآت Rewards Center -->
+        <div class="screen" id="rewardsScreen">
+            <h2 class="main-title">Rewards Center</h2>
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;"><span style="font-weight:700;">Daily Check-in</span><span style="color:var(--accent-gold);">Day 3 of 7</span></div>
+                <div class="checkin-row">
+                    <div class="day-box claimed"><i class="fas fa-check"></i><span>Mon</span></div>
+                    <div class="day-box claimed"><i class="fas fa-check"></i><span>Tue</span></div>
+                    <div class="day-box active"><span>+20</span><span>Wed</span></div>
+                    <div class="day-box"><span>+10</span><span>Thu</span></div>
+                    <div class="day-box"><span>+10</span><span>Fri</span></div>
+                    <div class="day-box"><span>+50</span><span>Sat</span></div>
                 </div>
+                <button class="btn-prime" style="background:var(--accent-gradient); color:#000;" onclick="claimDailyReward()">Claim Daily Reward</button>
+            </div>
+
+            <h4 style="font-size:14px; color:var(--text-sub); margin-bottom:12px;">Daily Tasks</h4>
+            <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px;">
+                <div><h5 style="font-size:13px; font-weight:700;">Watch 5 Episodes</h5><p style="font-size:11px; color:var(--neon-blue);">+50 Coins</p></div>
+                <button class="btn-prime" style="width:auto; margin:0; padding:6px 16px; font-size:12px; border-radius:8px;" onclick="switchInternalScreen('discoveryScreen', 1)">Go</button>
             </div>
         </div>
 
-        <!-- شريط التنقل السفلي الاحترافي الجديد -->
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchScreen('videoScreen', this)">
-                <i class="fas fa-compass"></i><span>اكتشف</span>
+        <!-- 5. شاشة متجر شحن العملات Coin Store -->
+        <div class="screen" id="storeScreen">
+            <h2 class="main-title">Coin Store</h2>
+            <div class="pack-grid">
+                <div class="pack-card" onclick="buyPackage(100)">
+                    <i class="fas fa-coins"></i><div class="pack-amount">100 Coins</div><div class="pack-bonus">Bonus: 0</div><span class="pack-price">$0.99</span>
+                </div>
+                <div class="pack-card" onclick="buyPackage(500)">
+                    <i class="fas fa-coins"></i><div class="pack-amount">500 Coins</div><div class="pack-bonus">Bonus: +50</div><span class="pack-price">$4.99</span>
+                </div>
+                <div class="pack-card" onclick="buyPackage(1200)">
+                    <div class="tag-popular">POPULAR</div>
+                    <i class="fas fa-box-open"></i><div class="pack-amount">1,200 Coins</div><div class="pack-bonus">Bonus: +150</div><span class="pack-price">$9.99</span>
+                </div>
+                <div class="pack-card" onclick="buyPackage(6000)">
+                    <i class="fas fa-gem"></i><div class="pack-amount">6,000 Coins</div><div class="pack-bonus">Bonus: +1,200</div><span class="pack-price">$49.99</span>
+                </div>
             </div>
-            <div class="nav-item" onclick="switchScreen('episodesScreen', this)">
-                <i class="fas fa-play-circle"></i><span>الحلقات</span>
+            <div class="btn-ghost" style="margin-top:20px; text-align:center; width:100%;">Restore Purchases</div>
+        </div>
+
+        <!-- 6. شاشة الـ Paywall وقفل الحلقات (Episode Unlock) -->
+        <div class="screen" id="paywallScreen" style="padding-top:140px;">
+            <div class="glass-card" style="margin-top:auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-lock" style="font-size:32px; color:var(--accent-gold); margin-bottom:10px;"></i>
+                    <h3 style="font-size:16px; font-weight:700;">Episode 12: The Betrayal</h3>
+                    <p style="color:var(--text-sub); font-size:12px;">The Billionaire's Secret Heir · Season 1</p>
+                </div>
+                <div class="paywall-option" id="opt1" onclick="selectPaywallOption('opt1', 20)">
+                    <div><h4 style="font-size:13px; font-weight:700;">Unlock this episode</h4><p style="font-size:11px; color:var(--text-sub);">One-time access to this episode</p></div>
+                    <span style="font-weight:700; color:var(--accent-gold);">20 🪙</span>
+                </div>
+                <div class="paywall-option selected" id="opt2" onclick="selectPaywallOption('opt2', 480)">
+                    <div><h4 style="font-size:13px; font-weight:700;">Unlock all remaining</h4><p style="font-size:11px; color:var(--neon-blue);">Get 20% off for the full series</p></div>
+                    <span style="font-weight:700; color:var(--accent-gold);">480 🪙</span>
+                </div>
+                <button class="btn-prime" style="margin-top:15px;" onclick="confirmUnlockEpisode()">Confirm & Unlock</button>
+                <div class="btn-ghost" style="width:100%; text-align:center;" onclick="switchInternalScreen('rewardsScreen', 2)">Earn Free Coins Instead</div>
             </div>
-            <div class="nav-item" onclick="switchScreen('shopScreen', this)">
-                <i class="fas fa-bolt"></i><span>المتجر</span>
-            </div>
-            <div class="nav-item" onclick="switchScreen('profileScreen', this)">
-                <i class="fas fa-user"></i><span>حسابي</span>
-            </div>
+        </div>
+
+        <!-- شريط التنقل السفلي الاحترافي الثابت للـ 4 شاشات الأساسية -->
+        <div class="bottom-nav" id="mainNavigation" style="display:none;">
+            <div class="nav-item active" onclick="switchInternalScreen('feedScreen', this)"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="nav-item" onclick="switchInternalScreen('discoveryScreen', this)"><i class="fas fa-compass"></i><span>استكشف</span></div>
+            <div class="nav-item" onclick="switchInternalScreen('rewardsScreen', this)"><i class="fas fa-gift"></i><span>المكافآت</span></div>
+            <div class="nav-item" onclick="switchInternalScreen('storeScreen', this)"><i class="fas fa-store"></i><span>المتجر</span></div>
         </div>
 
     </div>
 
+    <!-- العقل البرمجي والـ Logic الذكي لإدارة المحفظة والتنقل -->
     <script>
-        let currentBalance = 0;
-        let unlockedEpisodes = [1];
+        let walletBalance = 1250; // رصيد العملات المأخوذ من كود الـ UI الافتراضي بتاعك
+        let selectedPrice = 480;   // الخيار المالي التلقائي في الـ Paywall
 
-        function switchScreen(screenId, element) {
+        function updateHUD() {
+            document.getElementById('coinCountHUD').innerText = walletBalance.toLocaleString();
+        }
+
+        function switchInternalScreen(screenId, navElement) {
+            // إخفاء كل الشاشات بنظام الأنيميشن الناعم
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
             document.getElementById(screenId).classList.add('active-screen');
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
+
+            // إظهار شريط التنقل السفلي فقط بعد تخطي شاشة الـ Onboarding
+            if (screenId !== 'onboardingScreen') {
+                document.getElementById('mainNavigation').style.display = 'flex';
+            }
+
+            // تحديث حالة الأزرار السفلية النشطة لو كان التنقل من الشريط
+            if (navElement !== undefined && typeof navElement === 'object') {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                navElement.classList.add('active');
+            } else if (typeof navElement === 'number') {
+                // لو التنقل تم برمجياً من زرار داخلي، ننشط الأيقونة المقابلة في الشريط
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                if (navElement >= 0) document.querySelectorAll('.nav-item')[navElement].classList.add('active');
+            }
         }
 
-        function buyCoins(amount, price) {
-            currentBalance += amount;
-            updateUI();
-            alert('تم شحن ' + amount + ' عملة بنجاح! 🎉');
+        // تفاعل اللايك الفخم في الـ Video Feed
+        let feedLiked = false;
+        function toggleFeedLike() {
+            feedLiked = !feedLiked;
+            const heart = document.getElementById('feedHeart');
+            const count = document.getElementById('feedLikeCount');
+            if (feedLiked) {
+                heart.style.color = '#ff3b30'; heart.className = "fas fa-heart";
+                count.innerText = "1.3M";
+            } else {
+                heart.style.color = '#fff'; heart.className = "fas fa-heart";
+                count.innerText = "1.2M";
+            }
         }
 
-        function playEpisode(epNum, price) {
-            if (unlockedEpisodes.includes(epNum)) {
-                alert('جاري تشغيل الحلقة ' + epNum + '... 🎬');
-                switchScreen('videoScreen', document.querySelectorAll('.nav-item')[0]);
+        // سيستم الـ Paywall والخصم الذكي للحلقات
+        function selectPaywallOption(optId, price) {
+            document.querySelectorAll('.paywall-option').forEach(o => o.classList.remove('selected'));
+            document.getElementById(optId).classList.add('selected');
+            selectedPrice = price;
+        }
+
+        function confirmUnlockEpisode() {
+            if (walletBalance >= selectedPrice) {
+                walletBalance -= selectedPrice;
+                updateHUD();
+                alert('🔓 تم فتح العرض بنجاح! استمتع بمشاهدة الحلقة 12 الحصرية الآن.');
+                switchInternalScreen('feedScreen', 0);
+            } else {
+                alert('❌ رصيدك الحالي غير كافٍ لشراء هذا الخيار. سيتم تحويلك لمتجر الشحن الآن.');
+                switchInternalScreen('storeScreen', 3);
+            }
+        }
+
+        // شحن فوري من المتجر
+        function buyPackage(amount) {
+            walletBalance += amount;
+            updateHUD();
+            alert('🪙 مبروك! تم إضافة ' + amount + ' عملة إلى محفظتك بنجاح.');
+        }
+
+        // استلام مكافأة تسجيل الدخول اليومي
+        let claimedToday = false;
+        function claimDailyReward() {
+            if (claimedToday) {
+                alert('لقد قمت باستلام مكافأة اليوم بالفعل! عد غداً للمزيد من الأرباح 🪙');
                 return;
             }
-
-            if (currentBalance >= price) {
-                currentBalance -= price;
-                unlockedEpisodes.push(epNum);
-                
-                const statusBadge = document.getElementById('ep' + epNum + '-status');
-                statusBadge.className = "status-badge status-unlocked";
-                statusBadge.innerHTML = '<i class="fas fa-lock-open"></i> مفتوحة';
-                
-                // تغيير أيقونة القفل على البوستر لمثلث تشغيل
-                document.getElementById('lockIcon' + epNum).className = "fas fa-play";
-
-                updateUI();
-                alert('تم فتح الحلقة ' + epNum + ' بنجاح! 🔓');
-                switchScreen('videoScreen', document.querySelectorAll('.nav-item')[0]);
-            } else {
-                alert('رصيدك لا يكفي! تم تحويلك لمتجر شحن العملات.');
-                switchScreen('shopScreen', document.querySelectorAll('.nav-item')[2]);
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('userBalance').innerText = currentBalance;
-            document.getElementById('profileBalance').innerText = currentBalance;
-            document.getElementById('unlockedCount').innerText = unlockedEpisodes.length + ' حلقات';
-        }
-
-        let liked = false;
-        function toggleLike(element) {
-            liked = !liked;
-            const heartIcon = document.getElementById('heartIcon');
-            const likeCount = document.getElementById('likeCount');
-            if (liked) {
-                heartIcon.style.color = '#ff3b30';
-                likeCount.innerText = '2.5K';
-            } else {
-                heartIcon.style.color = '#fff';
-                likeCount.innerText = '2.4K';
-            }
+            walletBalance += 20;
+            updateHUD();
+            claimedToday = true;
+            alert('🎉 تم استلام 20 عملة مجانية مكافأة الحضور اليومي!');
         }
     </script>
 
