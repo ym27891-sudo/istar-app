@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iStar - Video Feed</title>
-    <!-- استدعاء أيقونات FontAwesome -->
+    <title>iStar - App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -24,7 +23,6 @@
             overflow: hidden;
         }
 
-        /* حاوية الموبايل */
         .phone-container {
             width: 393px;
             height: 852px;
@@ -36,44 +34,48 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        /* مشغل الفيديو الحقيقي */
-        .video-player {
+        /* شريط علوي لعرض الرصيد الحالي للمستخدم */
+        .top-balance-bar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-balance-bar i { color: #ffca28; font-size: 18px; }
+        .balance-text { font-weight: bold; font-size: 14px; color: #fff; }
+
+        /* الشاشة الأولى: الفيديو */
+        .screen {
             width: 100%;
             height: 100%;
-            object-fit: cover;
             position: absolute;
             top: 0;
             left: 0;
+            transition: transform 0.4s ease;
+        }
+
+        #videoScreen {
+            background: #111;
             z-index: 1;
         }
 
-        /* طبقة تظليل سوداء خفيفة أسفل الفيديو */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .video-placeholder {
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
-            z-index: 2;
-            pointer-events: none;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.9) 100%), 
+                        url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
         }
 
-        /* زر التشغيل في النص */
-        .play-overlay-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 70px;
-            color: rgba(255, 255, 255, 0.6);
-            z-index: 3;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.2s;
-            pointer-events: none;
-        }
-
-        /* أزرار التفاعل الجانبية */
         .side-buttons {
             position: absolute;
             bottom: 120px;
@@ -85,152 +87,177 @@
             z-index: 4;
         }
 
-        .action-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .action-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .action-item i { font-size: 28px; margin-bottom: 5px; }
+        .fa-heart { color: #ff3b30; }
+        .action-item span { font-size: 12px; font-weight: bold; }
+
+        .coin-btn {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #ffca28, #ff9800);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
             cursor: pointer;
         }
 
-        .action-item i {
-            font-size: 28px;
-            margin-bottom: 5px;
-            transition: transform 0.2s;
-        }
+        .video-details { position: absolute; bottom: 30px; left: 15px; right: 80px; z-index: 4; text-align: right; }
+        .username { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        .description { font-size: 14px; color: #e0e0e0; line-height: 1.4; }
 
-        .action-item:hover i {
-            transform: scale(1.1);
-        }
-
-        .action-item span {
-            font-size: 12px;
-            font-weight: bold;
-            color: #e1e1e1;
-        }
-
-        .fa-heart { color: #ff3b30; }
-
-        /* زرار العملات */
-        .coin-btn {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #ffca28, #ff9800);
-            border-radius: 50%;
+        /* الشاشة الثانية: متجر العملات (مخفية في البداية برة الشاشة) */
+        #shopScreen {
+            background-color: #12161f;
+            z-index: 2;
+            transform: translateY(100%); /* منزلة لتحت برة الشاشة */
+            padding: 80px 20px 20px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
-            animation: pulse 2s infinite;
+            margin-bottom: 25px;
         }
 
-        .coin-btn i {
-            font-size: 22px;
-            color: #fff;
+        .shop-title { font-size: 22px; font-weight: bold; color: #ffca28; }
+        .close-shop-btn { font-size: 24px; cursor: pointer; color: #a0a5b5; }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            overflow-y: auto;
         }
 
-        /* تفاصيل الفيديو */
-        .video-details {
-            position: absolute;
-            bottom: 30px;
-            left: 15px;
-            right: 80px;
-            z-index: 4;
-            text-align: right;
-            pointer-events: none;
+        /* كروت الشحن */
+        .coin-card {
+            background: #1a202c;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #2d3748;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
         }
 
-        .username {
-            font-size: 16px;
+        .coin-card:hover {
+            transform: scale(1.03);
+            border-color: #ffca28;
+        }
+
+        .coin-card i {
+            font-size: 35px;
+            color: #ffca28;
+            margin-bottom: 10px;
+        }
+
+        .coin-amount { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .coin-price {
+            display: inline-block;
+            background: #ff9800;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 13px;
             font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .description {
-            font-size: 14px;
-            color: #e0e0e0;
-            line-height: 1.4;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="phone-container" id="videoContainer">
-        <!-- رابط مباشر ومستقر تماماً من سيرفرات جوجل التجريبية (فيديو طولي خفيف) -->
-        <video class="video-player" id="myVideo" loop playsinline muted>
-            <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-            متصفحك لا يدعم تشغيل الفيديو.
-        </video>
+    <div class="phone-container">
+        
+        <!-- شريط الرصيد الثابت فوق -->
+        <div class="top-balance-bar">
+            <i class="fas fa-coins"></i>
+            <span class="balance-text">رصيدك: <span id="userBalance">0</span> عملة</span>
+        </div>
 
-        <!-- طبقة التظليل -->
-        <div class="overlay"></div>
+        <!-- شاشة الفيديو الأساسية -->
+        <div class="screen" id="videoScreen">
+            <div class="video-placeholder"></div>
+            
+            <div class="side-buttons">
+                <div class="action-item">
+                    <i class="fas fa-heart"></i>
+                    <span>2.4K</span>
+                </div>
+                <div class="action-item">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>142</span>
+                </div>
+                <!-- زرار فتح المتجر -->
+                <div class="coin-btn" onclick="openShop()">
+                    <i class="fas fa-coins"></i>
+                </div>
+            </div>
 
-        <!-- زر التشغيل -->
-        <i class="fas fa-play play-overlay-btn" id="playIcon"></i>
-
-        <!-- أزرار التفاعل الجانبية -->
-        <div class="side-buttons">
-            <div class="action-item" onclick="toggleLike(this)">
-                <i class="fas fa-heart"></i>
-                <span id="likeCount">2.4K</span>
-            </div>
-            <div class="action-item">
-                <i class="fas fa-comment-dots"></i>
-                <span>142</span>
-            </div>
-            <div class="action-item">
-                <i class="fas fa-share"></i>
-                <span>مشاركة</span>
-            </div>
-            <div class="coin-btn" onclick="alert('شحن العملات قريباً!')">
-                <i class="fas fa-coins"></i>
+            <div class="video-details">
+                <div class="username">@iStar_Premium</div>
+                <div class="description">اضغط على زرار العملات الذهبية لفتح متجر الشحن وتجربة الـ السيستم الحقيقي! 🪙✨</div>
             </div>
         </div>
 
-        <!-- تفاصيل الفيديو -->
-        <div class="video-details">
-            <div class="username">@iStar_Premium</div>
-            <div class="description">شاهد الحلقة الأولى من مسلسل "الهروب الكبير" الحصري! اضغط على الشاشة للتشغيل والإيقاف 🪙✨ #drama #shorts</div>
+        <!-- شاشة متجر العملات (Coin Shop) -->
+        <div class="screen" id="shopScreen">
+            <div class="shop-header">
+                <span class="shop-title">متجر العملات 🪙</span>
+                <i class="fas fa-times close-shop-btn" onclick="closeShop()"></i>
+            </div>
+
+            <!-- شبكة كروت الشحن -->
+            <div class="shop-grid">
+                <div class="coin-card" onclick="buyCoins(50)">
+                    <i class="fas fa-coins"></i>
+                    <div class="coin-amount">50 عملة</div>
+                    <div class="coin-price">10 جنيه</div>
+                </div>
+
+                <div class="coin-card" onclick="buyCoins(150)">
+                    <i class="fas fa-box-open"></i>
+                    <div class="coin-amount">150 عملة</div>
+                    <div class="coin-price">25 جنيه</div>
+                </div>
+
+                <div class="coin-card" onclick="buyCoins(400)">
+                    <i class="fas fa-coins"></i><i class="fas fa-coins"></i>
+                    <div class="coin-amount">400 عملة</div>
+                    <div class="coin-price">60 جنيه</div>
+                </div>
+
+                <div class="coin-card" onclick="buyCoins(1000)">
+                    <i class="fas fa-gem"></i>
+                    <div class="coin-amount">1000 عملة</div>
+                    <div class="coin-price">120 جنيه</div>
+                </div>
+            </div>
         </div>
+
     </div>
 
     <script>
-        const video = document.getElementById('myVideo');
-        const container = document.getElementById('videoContainer');
-        const playIcon = document.getElementById('playIcon');
+        // المتغير المسؤول عن حفظ رصيد المستخدم في ذاكرة الصفحة (العقل)
+        let currentBalance = 0;
 
-        // كود التحكم بالتشغيل
-        container.addEventListener('click', function(e) {
-            if(e.target.closest('.side-buttons')) return;
+        function openShop() {
+            // سحب شاشة المتجر لفوق لتغطي الشاشة
+            document.getElementById('shopScreen').style.transform = 'translateY(0)';
+        }
 
-            if (video.paused) {
-                video.muted = false; // تشغيل الصوت فور الضغط
-                video.play();
-                playIcon.style.opacity = '0';
-            } else {
-                video.pause();
-                playIcon.style.opacity = '1';
-            }
-        });
+        function closeShop() {
+            // إنزال شاشة المتجر لتحت لإخفائها والعودة للفيديو
+            document.getElementById('shopScreen').style.transform = 'translateY(100%)';
+        }
 
-        // تشغيل لايك تفاعلي
-        let liked = false;
-        function toggleLike(element) {
-            liked = !liked;
-            const heartIcon = element.querySelector('i');
-            const likeCount = document.getElementById('likeCount');
-            if(liked) {
-                heartIcon.style.color = '#ff3b30';
-                likeCount.innerText = '2.5K';
-            } else {
-                heartIcon.style.color = '#fff';
-                likeCount.innerText = '2.4K';
-            }
+        // دالة الشحن الحقيقية
+        function buyCoins(amount) {
+            currentBalance += amount; // زيادة الرصيد بقيمة الكارت
+            document.getElementById('userBalance').innerText = currentBalance; // تحديث الرقم في الشاشة فوراً
+            alert('تم شحن ' + amount + ' عملة بنجاح! 🎉');
         }
     </script>
 
