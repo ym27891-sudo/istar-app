@@ -47,7 +47,7 @@
             z-index: 1;
         }
 
-        /* طبقة تظليل سوداء خفيفة أسفل الفيديو عشان الكلام يبان واضح */
+        /* طبقة تظليل سوداء خفيفة أسفل الفيديو */
         .overlay {
             position: absolute;
             top: 0;
@@ -56,10 +56,10 @@
             height: 100%;
             background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
             z-index: 2;
-            pointer-events: none; /* عشان الضغط يمر للفيديو */
+            pointer-events: none;
         }
 
-        /* زر التشغيل الشفاف في النص */
+        /* زر التشغيل في النص */
         .play-overlay-btn {
             position: absolute;
             top: 50%;
@@ -161,19 +161,19 @@
 <body>
 
     <div class="phone-container" id="videoContainer">
-        <!-- مشغل الفيديو الحقيقي برابط مباشر سريع ودعم التشغيل الصامت المؤقت ومكرر تلقائياً -->
+        <!-- رابط مباشر ومستقر تماماً من سيرفرات جوجل التجريبية (فيديو طولي خفيف) -->
         <video class="video-player" id="myVideo" loop playsinline muted>
-            <source src="https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0ee273d1e8d6a134cbc366ad4e2079a&profile_id=165&oauth2_token_id=57447761" type="video/mp4">
+            <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
             متصفحك لا يدعم تشغيل الفيديو.
         </video>
 
-        <!-- طبقة التظليل الخارجي للجماليات -->
+        <!-- طبقة التظليل -->
         <div class="overlay"></div>
 
-        <!-- زر التشغيل في المنتصف -->
+        <!-- زر التشغيل -->
         <i class="fas fa-play play-overlay-btn" id="playIcon"></i>
 
-        <!-- أزرار التفاعل الجانبية يمين الشاشة -->
+        <!-- أزرار التفاعل الجانبية -->
         <div class="side-buttons">
             <div class="action-item" onclick="toggleLike(this)">
                 <i class="fas fa-heart"></i>
@@ -192,36 +192,33 @@
             </div>
         </div>
 
-        <!-- تفاصيل وصنف الفيديو أسفل الشاشة -->
+        <!-- تفاصيل الفيديو -->
         <div class="video-details">
             <div class="username">@iStar_Premium</div>
             <div class="description">شاهد الحلقة الأولى من مسلسل "الهروب الكبير" الحصري! اضغط على الشاشة للتشغيل والإيقاف 🪙✨ #drama #shorts</div>
         </div>
     </div>
 
-    <!-- كود التحكم بالتشغيل والـ Logic التفاعلي -->
     <script>
         const video = document.getElementById('myVideo');
         const container = document.getElementById('videoContainer');
         const playIcon = document.getElementById('playIcon');
 
-        // كود تشغيل وإيقاف الفيديو بالضغط على الشاشة
+        // كود التحكم بالتشغيل
         container.addEventListener('click', function(e) {
-            // نتأكد إن الضغطة مش على أزرار التفاعل الجانبية عشان ميعملش تداخل
             if(e.target.closest('.side-buttons')) return;
 
             if (video.paused) {
-                // إلغاء كتم الصوت عند أول ضغطة حقيقية للمستخدم لتفعيل الصوت
-                video.muted = false; 
+                video.muted = false; // تشغيل الصوت فور الضغط
                 video.play();
-                playIcon.style.opacity = '0'; // إخفاء زر التشغيل
+                playIcon.style.opacity = '0';
             } else {
                 video.pause();
-                playIcon.style.opacity = '1'; // إظهار زر التشغيل
+                playIcon.style.opacity = '1';
             }
         });
 
-        // حركة تفاعلية بسيطة لزرار اللايك
+        // تشغيل لايك تفاعلي
         let liked = false;
         function toggleLike(element) {
             liked = !liked;
