@@ -65,15 +65,15 @@
         .image-preview { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
         .image-preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
         
+        .delete-icon-btn { background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .delete-icon-btn:hover { background: #ef4444; color: white; }
+        
         .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
         .action-btn { flex: 1; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 15px; }
         .btn-call { background: #2563eb; }
         .btn-whatsapp { background: #16a34a; }
         
         #sales-badge-info { font-size: 13px; font-weight: bold; padding: 4px 10px; border-radius: 6px; background: #1e293b; color: #a7f3d0; margin-left: 10px; display: none; }
-        
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; margin-right: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -91,7 +91,6 @@
     <div id="main-container">
         <div id="map"></div>
 
-        <!-- لوحة تحكم الأدمن الذكية (تقرأ من الانفنتوري) -->
         <div id="admin-sidebar">
             <span style="float:left; cursor:pointer; font-weight:bold; font-size:18px;" onclick="window.closeAdminSidebar()">✕</span>
             <h3 id="admin-sidebar-title" style="margin-bottom:15px; color:#1e3a8a;">➕ إضافة موقع عمارة</h3>
@@ -127,7 +126,6 @@
             
             <hr style="margin: 20px 0; border-top: 2px solid #e2e8f0;">
             
-            <!-- المنطقة الذكية للقوالب وتخصيص الشقق -->
             <div id="dynamic-inventory-data" style="display:none;">
                 <h4 style="color:#0f172a; margin-bottom:10px;">📐 إعدادات المساحات المجمعة (Size Templates):</h4>
                 <p style="font-size:11px; color:#64748b; margin-bottom:10px;">ارفع الصور واكتب التفاصيل لكل مساحة مرة واحدة، وهتتطبق على كل الشقق اللي بنفس المساحة.</p>
@@ -146,7 +144,6 @@
         </div>
     </div>
 
-    <!-- النافذة الأولى (عرض العمارة والأدوار للعميل) -->
     <div id="building-modal" class="modal-overlay" onclick="window.closeModal(this, event)">
         <div class="modal-content">
             <span class="modal-close" onclick="window.closeBuildingModal()">✕</span>
@@ -174,7 +171,6 @@
         </div>
     </div>
 
-    <!-- النافذة الثانية (كارت الشقة الفخم وأنظمة السداد) -->
     <div id="apartment-modal" class="modal-overlay" onclick="window.closeModal(this, event)">
         <div class="modal-content" style="max-width: 550px; border-radius: 16px; border-top: 6px solid #3b82f6;">
             <span class="modal-close" onclick="window.closeApartmentModal()">✕</span>
@@ -184,7 +180,7 @@
             </div>
             <hr style="margin: 15px 0; border-top: 1px solid #e2e8f0;">
             
-            <h3 style="font-size:13px; color:#64748b; margin-bottom:4px;">📸 صور الشقة من الداخل:</h3>
+            <h3 style="font-size:13px; color:#64748b; margin-bottom:4px;">📸 صور الشقة من الداخل (اضغط لتكبير الصورة):</h3>
             <div id="apt-modal-gallery" class="gallery"></div>
             
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
@@ -195,7 +191,6 @@
                 </div>
                 <span id="apt-modal-payment" class="payment-badge"></span>
                 
-                <!-- المنطقة السحرية اللي هتستقبل حسبة الـ Inventory -->
                 <div id="custom-payment-zone" style="margin-top:15px; padding:15px; border-top:2px dashed #cbd5e1; display:none;">
                     <p style="color:#166534; font-weight:bold; font-size:16px; margin-bottom:10px;">💳 نظام السداد المخصص والمرسل لك:</p>
                     <div style="background:white; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
@@ -214,16 +209,16 @@
         </div>
     </div>
 
-    <!-- نافذة اللايت بوكس للصور -->
     <div id="lightbox-overlay" onclick="window.closeLightbox()">
         <span class="lightbox-close" onclick="window.closeLightbox()">&times;</span>
         <img id="lightbox-img" src="" alt="معاينة واضحة">
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCN5AKTo3Ojfh3Dx78sSa3nglhNXDpCx_8",
             authDomain: "hadayek-realestate.firebaseapp.com",
@@ -232,8 +227,8 @@
             messagingSenderId: "889853758510",
             appId: "1:889853758510:web:8144e5362f788363a0e3bf"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         const map = L.map('map').setView([29.9730, 31.1150], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -244,32 +239,28 @@
         let isEditingExisting = false;
         let editingBuildingId = null;
 
-        // قواعد البيانات في الميموري
-        let inventoryProperties = []; // الشقق من الانفنتوري
-        let mapBuildings = [];        // العمارات وقوالب الصور من الماب
+        let inventoryProperties = []; 
+        let mapBuildings = [];        
         
-        // للتحكم في اللينك
         let mapDataLoaded = false;
         let invDataLoaded = false;
         let redirectAttempted = false;
         let currentSalesData = { name: "خدمة العملاء", phone: "01000000000", whatsapp: "201000000000" };
-        let currentSelectedBuildingData = null; // لتخزين الداتا المدمجة عند الفتح
+        let currentSelectedBuildingData = null; 
 
-        // داتا الأدمن المؤقتة أثناء التعديل
         let currentSidebarBuildingImages = [];
-        let currentSizeTemplates = {}; // { "125": { view, rooms, payment, images: [] } }
-        let currentAptOverrides = {};  // { "A1": { view, rooms, payment, images: [] } }
+        let currentSizeTemplates = {}; 
+        let currentAptOverrides = {};  
 
-        // 1. الاستماع للانفنتوري (مصدر الحقيقة للشقق المتاحة)
-        onSnapshot(collection(db, 'properties'), (snap) => {
+        // سحب البيانات من الفايربيز
+        db.collection('properties').onSnapshot((snap) => {
             inventoryProperties = snap.docs.map(d => ({id: d.id, ...d.data()}));
             invDataLoaded = true;
             window.renderMarkers();
             tryRedirect();
         });
 
-        // 2. الاستماع للماب (مصدر الحقيقة للإحداثيات والصور والقوالب)
-        onSnapshot(collection(db, 'map_buildings'), (snap) => {
+        db.collection('map_buildings').onSnapshot((snap) => {
             mapBuildings = snap.docs.map(d => ({id: d.id, ...d.data()}));
             mapDataLoaded = true;
             window.renderMarkers();
@@ -287,12 +278,10 @@
             map.eachLayer(function (layer) { if (layer instanceof L.Marker && layer !== tempMarker) map.removeLayer(layer); });
             
             mapBuildings.forEach((mapB) => {
-                // فلترة الشقق المتاحة في هذه العمارة من الانفنتوري
-                const bApts = inventoryProperties.filter(p => p.area === mapB.name && p.status === 'متاح');
+                // الفلترة الذكية عشان نطلع المتاح بس
+                const bApts = inventoryProperties.filter(p => (p.area || '').trim() === (mapB.name || '').trim() && p.status === 'متاح');
                 
-                // هنظهر الدبوس حتى لو مفيش شقق عشان لو الأدمن بيعدل، بس للعميل ممكن نقفل الكارت
                 const marker = L.marker(mapB.coords).addTo(map);
-                
                 let tooltipText = `${mapB.name}`;
                 if(!adminMode && bApts.length > 0) tooltipText += ` (${bApts.length} متاح)`;
                 
@@ -348,12 +337,12 @@
             document.getElementById('admin-sidebar').style.display = 'block';
         });
 
-        // سحب ذكي من الانفنتوري للمساعدة في الإعداد
+        // الميزة العبقرية: جلب الأدوار والمساحات فوراً من الانفنتوري
         window.fetchBuildingFromInventory = () => {
             const bName = document.getElementById('form-b-name').value.trim();
             if(!bName) return alert("اكتب اسم العمارة الأول!");
             
-            const bProps = inventoryProperties.filter(p => p.area === bName);
+            const bProps = inventoryProperties.filter(p => (p.area || '').trim() === bName);
             const statusMsg = document.getElementById('inv-status-msg');
             
             if(bProps.length === 0) {
@@ -369,7 +358,6 @@
             
             document.getElementById('dynamic-inventory-data').style.display = 'block';
             
-            // بناء قوالب المساحات (إذا لم تكن موجودة مسبقاً في التعديل)
             const sizesContainer = document.getElementById('size-templates-container');
             sizesContainer.innerHTML = '';
             uniqueSizes.forEach(size => {
@@ -387,7 +375,6 @@
                     </div>`;
             });
 
-            // تحديث دروب داون الاستثناءات
             const aptSelect = document.getElementById('override-apt-selector');
             aptSelect.innerHTML = '<option value="" disabled selected>اختر كود الشقة لتخصيصها...</option>';
             bProps.forEach(p => {
@@ -412,7 +399,6 @@
             }
         };
 
-        // إضافة تخصيص لشقة معينة
         window.addAptOverride = (code) => {
             if(!code || currentAptOverrides[code]) return;
             currentAptOverrides[code] = { view: '', rooms: '', payment: '', images: [] };
@@ -438,6 +424,7 @@
 
         window.removeAptOverride = (code) => { delete currentAptOverrides[code]; window.renderAptOverrides(); };
         window.updateOverride = (code, field, val) => { currentAptOverrides[code][field] = val; };
+        
         window.handleOverrideImages = (input, code) => {
             const preview = document.getElementById(`override-img-preview-${code}`);
             if(input.files) {
@@ -470,11 +457,9 @@
             bPreview.innerHTML = '';
             currentSidebarBuildingImages.forEach(src => { bPreview.innerHTML += `<img src="${src}"/>`; });
 
-            // استرجاع القوالب والاستثناءات
             currentSizeTemplates = mapB.sizeTemplates || {};
             currentAptOverrides = mapB.aptOverrides || {};
             
-            // سحب الشقق من الانفنتوري لتحديث الواجهة بناء على المتوفر حالياً
             window.fetchBuildingFromInventory();
             window.renderAptOverrides();
 
@@ -482,7 +467,7 @@
             delBtn.style.display = 'block';
             delBtn.onclick = async function() {
                 if(confirm(`هل أنت متأكد من حذف ${mapB.name} من الخريطة؟ (شققها في الانفنتوري مش هتتحذف)`)) {
-                    await deleteDoc(doc(db, 'map_buildings', editingBuildingId.toString()));
+                    await db.collection('map_buildings').doc(editingBuildingId.toString()).delete();
                     window.closeAdminSidebar();
                 }
             };
@@ -519,7 +504,7 @@
             };
 
             let targetId = isEditingExisting ? editingBuildingId.toString() : Date.now().toString();
-            await setDoc(doc(db, 'map_buildings', targetId), mapData);
+            await db.collection('map_buildings').doc(targetId).set(mapData);
             
             alert("تم حفظ إعدادات العمارة في الخريطة بنجاح!");
             if(tempMarker) map.removeLayer(tempMarker);
@@ -537,7 +522,6 @@
                 return;
             }
 
-            // دمج الداتا عشان نستخدمها في كارت الشقة
             currentSelectedBuildingData = { mapB, bApts };
 
             document.getElementById('modal-b-name').innerText = mapB.name;
@@ -562,9 +546,7 @@
             const floorsList = document.getElementById('modal-floors-list');
             floorsList.innerHTML = '';
             
-            // تجميع الشقق بالأدوار
             const uniqueFloors = [...new Set(bApts.map(a => a.floor || 'غير محدد'))];
-            // ترتيب الأدوار لو أمكن (لو مكتوبة أرقام)
             uniqueFloors.sort((a,b) => parseInt(a) - parseInt(b));
             
             uniqueFloors.forEach(floorName => {
@@ -585,10 +567,8 @@
             const filteredApts = bApts.filter(a => (a.floor || 'غير محدد') === floorName);
             
             filteredApts.forEach(apt => {
-                // سحب الإعدادات الخاصة بهذه الشقة (Override) أو من القالب (Template)
                 const override = (mapB.aptOverrides && mapB.aptOverrides[apt.code]) || {};
                 const template = (mapB.sizeTemplates && mapB.sizeTemplates[apt.size]) || {};
-                
                 const aptView = override.view || template.view || "واجهة";
                 
                 sizesList.innerHTML += `
@@ -635,7 +615,6 @@
                 gallery.innerHTML = '<p style="color:#94a3b8; font-size:12px;">📸 لم يتم تخصيص صور داخلية لهذه المساحة بعد.</p>';
             }
 
-            // استقبال بارامترز حاسبة الانفنتوري (لو موجودة)
             const urlParams = new URLSearchParams(window.location.search);
             const customPaymentZone = document.getElementById('custom-payment-zone');
             
@@ -678,7 +657,7 @@
                 if(mapB) {
                     map.flyTo(mapB.coords, 18, { animate: true, duration: 2 });
                     
-                    const bApts = inventoryProperties.filter(p => p.area === mapB.name && p.status === 'متاح');
+                    const bApts = inventoryProperties.filter(p => (p.area || '').trim() === mapB.name && p.status === 'متاح');
                     
                     setTimeout(() => {
                         window.openBuildingModal(mapB, bApts);
