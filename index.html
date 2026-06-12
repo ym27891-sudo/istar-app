@@ -3,374 +3,625 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iStar Premium Platform</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>منظومة إدارة الخرائط العقارية الاحترافية</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root {
-            --bg-dark: #0a0a0f;
-            --card-glass: rgba(26, 26, 31, 0.65);
-            --neon-purple: #6224d1;
-            --neon-blue: #00d1ff;
-            --accent-gold: #ffca28;
-            --text-main: #ffffff;
-            --text-sub: #a0a5b5;
-            --border-glass: rgba(255, 255, 255, 0.08);
-        }
-
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #030305;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; color: var(--text-main); overflow: hidden;
-        }
-
-        /* شاسيه الموبايل الاحترافي */
-        .phone-container {
-            width: 393px; height: 852px;
-            background-color: var(--bg-dark);
-            border-radius: 44px; border: 10px solid #1e222b;
-            position: relative; overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column;
-        }
-
-        /* المحفظة العلوية الزجاجية الثابتة */
-        .wallet-hud {
-            position: absolute; top: 24px; left: 20px; z-index: 100;
-            background: rgba(15, 15, 20, 0.75); backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px); padding: 8px 16px;
-            border-radius: 24px; border: 1px solid var(--border-glass);
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .wallet-hud i { color: var(--accent-gold); font-size: 16px; }
-        .wallet-text { font-weight: 600; font-size: 13px; }
-
-        /* شاشة العرض والأنيميشن */
-        .screen {
-            width: 100%; height: 100%;
-            position: absolute; top: 0; left: 0;
-            opacity: 0; transform: scale(0.95); pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            padding: 85px 20px 90px 20px; overflow-y: auto;
-            display: flex; flex-direction: column;
-        }
-        .active-screen { opacity: 1; transform: scale(1); pointer-events: auto; }
-
-        /* شريط التنقل السفلي الاحترافي */
-        .bottom-nav {
-            height: 76px; background: rgba(15, 15, 20, 0.7);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border-glass);
-            display: flex; justify-content: space-around; align-items: center;
-            position: absolute; bottom: 0; width: 100%; z-index: 90; padding-bottom: 12px;
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #525966; cursor: pointer; font-size: 11px; font-weight: 500; gap: 4px; transition: color 0.2s; }
-        .nav-item.active { color: var(--neon-blue); }
-        .nav-item i { font-size: 19px; }
-
-        /* تصفيف العناصر المخصصة لأكوادك */
-        .main-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .glass-card { background: var(--card-glass); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid var(--border-glass); padding: 16px; margin-bottom: 15px; }
-
-        /* 1. Onboarding Vibes */
-        .vibe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .vibe-chip { padding: 14px; background: rgba(255,255,255,0.05); border-radius: 14px; text-align: center; border: 1px solid var(--border-glass); cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
-        .vibe-chip.selected { background: var(--neon-purple); border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(98, 36, 209, 0.4); }
-
-        /* 2. Video Feed Custom Style */
-        #feedScreen { padding: 0; background: #000; }
-        .feed-video-bg { width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.95) 100%), url('https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?q=80&w=1974&auto=format&fit=crop'); background-size: cover; background-position: center; }
-        .feed-side-actions { position: absolute; bottom: 110px; right: 16px; display: flex; flex-direction: column; gap: 20px; z-index: 5; }
-        .feed-action { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .feed-action .circle-btn { width: 46px; height: 46px; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.1); }
-        .feed-action span { font-size: 11px; color: var(--text-sub); font-weight: 600; }
-        .feed-details { position: absolute; bottom: 110px; left: 20px; right: 80px; z-index: 5; text-align: right; }
-
-        /* 3. Discovery & Series Cards */
-        .showcase-poster { width: 100%; height: 180px; border-radius: 16px; background-size: cover; background-position: center; margin-bottom: 12px; position: relative; }
-        .poster-overlay { position: absolute; bottom: 0; width: 100%; padding: 15px; background: linear-gradient(180deg, transparent, rgba(0,0,0,0.9)); border-radius: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .grid-shows { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .show-card { background: var(--card-glass); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-glass); cursor: pointer; }
-        .show-thumb { width: 100%; height: 130px; background-size: cover; background-position: center; }
-        .show-info { padding: 10px; }
-        .show-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* 4. Rewards Center & Check-in */
-        .checkin-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; }
-        .day-box { flex: 0 0 48px; height: 65px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 11px; border: 1px solid var(--border-glass); }
-        .day-box.claimed { background: rgba(0, 209, 255, 0.15); border-color: var(--neon-blue); color: var(--neon-blue); }
-        .day-box.active { background: var(--accent-gold); color: #000; font-weight: bold; box-shadow: 0 0 10px rgba(255,202,40,0.4); }
-
-        /* 5. Coin Packages */
-        .pack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .pack-card { background: var(--card-glass); border-radius: 18px; padding: 16px; text-align: center; border: 1px solid var(--border-glass); cursor: pointer; position: relative; transition: transform 0.2s; }
-        .pack-card:hover { transform: scale(1.03); border-color: var(--accent-gold); }
-        .pack-card i { font-size: 28px; color: var(--accent-gold); margin-bottom: 8px; }
-        .pack-amount { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-        .pack-bonus { font-size: 10px; color: var(--neon-blue); margin-bottom: 10px; font-weight: 600; }
-        .pack-price { display: block; background: var(--accent-gold); color: #000; padding: 5px; border-radius: 10px; font-size: 12px; font-weight: 700; }
-        .tag-popular { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: red; color: #fff; font-size: 8px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
-
-        /* 6. Paywall Option Rows */
-        .paywall-option { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
-        .paywall-option.selected { border-color: var(--neon-blue); background: rgba(0, 209, 255, 0.05); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; flex-direction: column; height: 100vh; background-color: #f8fafc; color: #1e293b; overflow: hidden; }
         
-        /* أزرار بروفيشنال موحدة */
-        .btn-prime { background: linear-gradient(90deg, var(--neon-purple), #8621a6); color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; cursor: pointer; border: none; width: 100%; margin-top: 10px; box-shadow: 0 4px 15px rgba(98, 36, 209, 0.4); }
-        .btn-ghost { background: transparent; color: var(--text-sub); padding: 10px; text-align: center; font-size: 13px; cursor: pointer; margin-top: 5px; }
+        #top-bar { background: #0f172a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); z-index: 10; }
+        .top-btns-group { display: flex; gap: 10px; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s ease; }
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-admin-active { background: #ef4444 !important; }
+        .btn-sales { background: #8b5cf6; }
+        .btn-sales:hover { background: #7c3aed; }
+
+        #main-container { display: flex; flex: 1; height: calc(100vh - 60px); width: 100%; position: relative; }
+        #map { flex: 1; height: 100%; z-index: 1; }
+        
+        /* النوافذ المنبثقة */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; width: 90%; max-width: 700px; max-height: 85vh; border-radius: 20px; padding: 30px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9) translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-close { position: absolute; top: 20px; left: 20px; font-size: 24px; cursor: pointer; color: #94a3b8; }
+
+        /* نافذة عرض الصور الكبيرة بدقة عالية (Lightbox) */
+        #lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 3000; display: none; }
+        #lightbox-img { max-width: 90%; max-height: 85vh; border-radius: 12px; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        .lightbox-close { position: absolute; top: 20px; left: 20px; color: white; font-size: 35px; cursor: pointer; }
+
+        .animated-section { transition: all 0.3s ease; opacity: 1; transform: translateX(0); }
+        .animated-section.fade-out { opacity: 0; transform: translateX(50px); display: none; }
+        .animated-section.fade-in { animation: slideIn 0.4s forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+
+        .floor-btn { background: #f1f5f9; color: #1e293b; border: 2px solid #e2e8f0; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; font-size: 16px; font-weight: bold; width: 100%; margin-bottom: 10px; }
+        .floor-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+        .size-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .size-card:hover { border-color: #10b981; background: #f0fdf4; }
+
+        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: bold; margin-left: 6px; }
+        .status-ready { display: inline-block; background: #dcfce7; color: #166534; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: bold; }
+        .status-construction { display: inline-block; background: #ffedd5; color: #9a3412; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: bold; }
+        
+        .price-badge { background: #dcfce7; color: #15803d; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 16px; }
+        .payment-badge { background: #f1f5f9; color: #334155; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 8px; display: inline-block; }
+
+        .gallery { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+        .gallery img { width: 130px; height: 95px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 2px solid #e2e8f0; transition: transform 0.2s; }
+        .gallery img:hover { transform: scale(1.05); border-color: #3b82f6; }
+        
+        #admin-sidebar { width: 420px; background: white; box-shadow: -4px 0 15px rgba(0,0,0,0.1); padding: 25px; overflow-y: auto; z-index: 5; display: none; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        .nested-box { border: 2px dashed #3b82f6; padding: 15px; margin-top: 15px; background: #f8fafc; border-radius: 10px; position: relative; }
+        .apt-edit-box { background: white; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; position: relative; }
+        
+        .image-preview { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .image-preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+        
+        .delete-icon-btn { background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .delete-icon-btn:hover { background: #ef4444; color: white; }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .action-btn { flex: 1; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 15px; }
+        .btn-call { background: #2563eb; }
+        .btn-whatsapp { background: #16a34a; }
+        
+        /* بار السيلز العلوي المخصص لإصدار اللينكات */
+        #sales-badge-info { font-size: 13px; font-weight: bold; padding: 4px 10px; border-radius: 6px; background: #1e293b; color: #a7f3d0; margin-left: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="phone-container">
-        
-        <!-- المحفظة العلوية الذكية -->
-        <div class="wallet-hud">
-            <i class="fas fa-coins"></i>
-            <span class="wallet-text">رصيدك: <span id="coinCountHUD">1,250</span> عملة</span>
+    <div id="top-bar">
+        <div style="display: flex; align-items: center;">
+            <h2>منظومة إدارة الخرائط العقارية الذكية 🏢</h2>
+            <div id="sales-badge-info"></div>
         </div>
+        <div class="top-btns-group">
+            <button id="admin-toggle-btn" class="btn" onclick="toggleAdminMode()">🔧 وضع إضافة وتعديل العماير</button>
+        </div>
+    </div>
 
-        <!-- 1. شاشة الـ Onboarding (اختيار الميول) -->
-        <div class="screen active-screen" id="onboardingScreen" style="padding-top: 120px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <div style="width: 70px; height: 70px; background: var(--neon-purple); border-radius: 20px; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 0 20px var(--neon-purple);"><i class="fas fa-play" style="font-size: 28px;"></i></div>
-                <h2 class="main-title" style="margin-bottom: 5px;">i Star</h2>
-                <p style="color: var(--text-sub); font-size: 14px;">Watch. Unlock. Earn.</p>
+    <div id="main-container">
+        <div id="map"></div>
+
+        <div id="admin-sidebar">
+            <span style="float:left; cursor:pointer; font-weight:bold; font-size:18px;" onclick="closeAdminSidebar()">✕</span>
+            <h3 id="admin-sidebar-title" style="margin-bottom:15px; color:#1e3a8a;">➕ إضافة عمارة جديدة للخرائط</h3>
+            
+            <div class="form-group"><label>اسم أو رقم العمارة (يطابق الانفنتوري):</label><input type="text" id="form-b-name" placeholder="مثال: عمارة 156أ"></div>
+            <div class="form-group"><label>الوصف والموقع:</label><textarea id="form-b-desc" rows="2" placeholder="مثال: شارع 5 أ - ثالث نمرة من البوابة الأولى"></textarea></div>
+            
+            <div class="form-group">
+                <label>🏗️ حالة إنشاء العمارة ككل:</label>
+                <select id="form-b-status" onchange="toggleBuildingDeliveryInput(this.value)">
+                    <option value="مبنية">مبنية (جاهزة للاستلام الفوري)</option>
+                    <option value="تحت_الإنشاء">تحت الإنشاء</option>
+                </select>
             </div>
-            <div class="glass-card" style="margin-top: auto;">
-                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Pick your vibes</h3>
-                <p style="color: var(--text-sub); font-size: 12px; margin-bottom: 15px;">We'll customize your feed based on what you love.</p>
-                <div class="vibe-grid">
-                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Romance</div>
-                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Thriller</div>
-                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Sci-Fi</div>
-                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Comedy</div>
-                    <div class="vibe-chip" onclick="this.classList.toggle('selected')">Drama</div>
-                    <div class="vibe-chip selected" onclick="this.classList.toggle('selected')">Action</div>
+            <div class="form-group" id="form-b-delivery-group" style="display:none;">
+                <label>📅 موعد تسليم العمارة المتوقع:</label>
+                <input type="text" id="form-b-delivery" placeholder="مثال: 6 شهور">
+            </div>
+
+            <div class="form-group">
+                <label>📸 صور واجهة ومداخل العمارة:</label>
+                <input type="file" id="form-b-images" multiple accept="image/*" onchange="handleBuildingImages(this)">
+                <div id="b-images-preview" class="image-preview"></div>
+            </div>
+            
+            <hr style="margin: 20px 0; border-top: 2px solid #e2e8f0;">
+            <h4 style="color:#0f172a;">🏢 الطوابق والشقق المرئية للعميل:</h4>
+            <div id="form-floors-container"></div>
+            <button class="btn" style="background:#10b981; margin-top:10px; width:100%" onclick="addFloorForm()">➕ إضافة دور جديد للماب</button>
+            
+            <button class="btn btn-success" style="width:100%; margin-top:25px; padding:14px; font-size:16px;" onclick="saveBuildingFromSidebar()">💾 حفظ الخريطة بقاعدة البيانات</button>
+            <button class="btn btn-danger" id="sidebar-delete-btn" style="width:100%; margin-top:10px; padding:10px; display:none;">❌ حذف هذه العمارة تماماً</button>
+        </div>
+    </div>
+
+    <div id="building-modal" class="modal-overlay" onclick="closeModal(this, event)">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBuildingModal()">✕</span>
+            
+            <h3 style="font-size:14px; color:#64748b; margin-bottom:5px;">📸 ألبوم صور العمارة والمدخل (اضغط لتكبير الصورة):</h3>
+            <div id="modal-b-gallery" class="gallery"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-top:10px;">
+                <div>
+                    <h2 id="modal-b-name" style="font-size: 28px;">اسم العمارة</h2>
+                    <p id="modal-b-loc" style="color: #64748b; font-size: 15px; margin-top:4px;"></p>
                 </div>
-                <button class="btn-prime" style="margin-top: 25px;" onclick="switchInternalScreen('feedScreen', 0)">Start Watching</button>
-                <div class="btn-ghost" onclick="switchInternalScreen('discoveryScreen', 1)">I already have an account</div>
+                <div id="modal-b-status-zone" style="text-align:left;"></div>
+            </div>
+            
+            <div id="modal-b-desc-box" class="info-box" style="margin-top:15px;"></div>
+            
+            <div id="floors-section" class="animated-section" style="margin-top:20px;">
+                <h3 style="margin-bottom: 15px; font-size: 18px; color: #475569;">⚙️ اختر الدور لمعاينة المساحات المتوفرة:</h3>
+                <div id="modal-floors-list"></div>
+            </div>
+
+            <div id="sizes-section" class="animated-section fade-out" style="margin-top:20px;">
+                <button class="btn" style="background:#64748b; margin-bottom:15px; padding:6px 12px;" onclick="goBackToFloors()">⬅️ العودة للأدوار</button>
+                <h3 id="selected-floor-title" style="margin-bottom: 15px; font-size: 18px; color: #475569;">المساحات المتاحة:</h3>
+                <div id="modal-sizes-list"></div>
             </div>
         </div>
+    </div>
 
-        <!-- 2. شاشة الـ Home Video Feed -->
-        <div class="screen" id="feedScreen">
-            <div class="feed-video-bg"></div>
-            <!-- الأزرار الجانبية للتفاعل -->
-            <div class="feed-side-actions">
-                <div class="feed-action" onclick="toggleFeedLike()">
-                    <div class="circle-btn"><i class="fas fa-heart" id="feedHeart" style="color:#fff;"></i></div>
-                    <span id="feedLikeCount">1.2M</span>
+    <div id="apartment-modal" class="modal-overlay" onclick="closeModal(this, event)">
+        <div class="modal-content" style="max-width: 550px; border-radius: 16px; border-top: 6px solid #3b82f6;">
+            <span class="modal-close" onclick="closeApartmentModal()">✕</span>
+            <h2 id="apt-modal-title" style="color:#0f172a;">تفاصيل الشقة الفاخرة</h2>
+            <hr style="margin: 15px 0; border-top: 1px solid #e2e8f0;">
+            
+            <h3 style="font-size:13px; color:#64748b; margin-bottom:4px;">📸 صور الشقة من الداخل (اضغط لتكبير الصورة):</h3>
+            <div id="apt-modal-gallery" class="gallery"></div>
+            
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                <p style="margin-bottom: 8px; font-size: 16px;">👁️ <strong>الإطلالة:</strong> <span id="apt-modal-view"></span></p>
+                <p style="margin-bottom: 8px; font-size: 16px;">🛏️ <strong>التقسيم وغرف النوم:</strong> <span id="apt-modal-rooms"></span></p>
+                <div style="margin-top: 15px; display:flex; justify-content:space-between; align-items:center;">
+                    <span id="apt-modal-price" class="price-badge"></span>
                 </div>
-                <div class="feed-action">
-                    <div class="circle-btn"><i class="fas fa-comment-dots"></i></div>
-                    <span>45.8K</span>
-                </div>
-                <div class="feed-action" onclick="switchInternalScreen('paywallScreen', -1)">
-                    <div class="circle-btn" style="background: var(--accent-gold);"><i class="fas fa-lock" style="color:#000; font-size:16px;"></i></div>
-                    <span style="color:var(--accent-gold);">Ep. 12</span>
-                </div>
-            </div>
-            <!-- تفاصيل الفيديو أسفل اليسار -->
-            <div class="feed-details">
-                <h4 class="username">@alex_vfx_creator</h4>
-                <p class="description">The neon city never sleeps. Part 11 of the Cyberpunk Saga is finally here! #scifi #neon #shortfilm</p>
-                <div style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11px; color:var(--text-sub);"><i class="fas fa-music"></i> <span>Original Sound - Alex VFX</span></div>
-            </div>
-        </div>
-
-        <!-- 3. شاشة الـ Discovery -->
-        <div class="screen" id="discoveryScreen">
-            <h2 class="main-title">Discover</h2>
-            <!-- البوستر الكبير المميز المصمم بأكوادك -->
-            <div class="showcase-poster" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop');">
-                <div class="poster-overlay">
-                    <div>
-                        <h3 style="font-size: 16px; font-weight: 700;">The Billionaire's Secret Heir</h3>
-                        <p style="color: var(--text-sub); font-size: 11px;">Trending Drama · Season 1</p>
+                <span id="apt-modal-payment" class="payment-badge"></span>
+                
+                <div id="custom-payment-zone" style="margin-top:15px; padding:15px; border-top:2px dashed #cbd5e1; display:none;">
+                    <p style="color:#166534; font-weight:bold; font-size:16px; margin-bottom:10px;">💳 نظام السداد المخصص والمرسل لك:</p>
+                    <div style="background:white; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+                        <p id="view-total-price" style="margin-bottom:6px; color:#1e293b; font-weight:bold;"></p>
+                        <p id="view-down-payment" style="margin-bottom:6px; color:#15803d; font-weight:bold;"></p>
+                        <p id="view-monthly-installment" style="margin-bottom:6px; color:#0369a1; font-weight:bold;"></p>
+                        <p id="view-months-count" style="margin-bottom:4px; color:#b45309; font-weight:bold;"></p>
                     </div>
-                    <button class="btn-prime" style="width:auto; padding: 6px 16px; margin:0; font-size:12px; border-radius:8px;" onclick="switchInternalScreen('paywallScreen', -1)">Watch Now</button>
                 </div>
             </div>
             
-            <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--text-sub);">Trending Now</h4>
-            <div class="grid-shows">
-                <div class="show-card" onclick="switchInternalScreen('paywallScreen', -1)">
-                    <div class="show-thumb" style="background-image: url('https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=300&auto=format&fit=crop');"></div>
-                    <div class="show-info"><div class="show-title">Love in the Fast Lane</div><p style="font-size:10px; color:var(--neon-blue);">52 Episodes</p></div>
-                </div>
-                <div class="show-card" onclick="switchInternalScreen('paywallScreen', -1)">
-                    <div class="show-thumb" style="background-image: url('https://images.unsplash.com/photo-1509281373149-e957c6296406?q=80&w=300&auto=format&fit=crop');"></div>
-                    <div class="show-info"><div class="show-title">Shadow of the Mafia</div><p style="font-size:10px; color:var(--text-sub);">80 Episodes</p></div>
-                </div>
+            <div class="action-buttons">
+                <a href="#" id="sidebar-call-btn" class="action-btn btn-call">📞 اتصل للحجز والاستعلام</a>
+                <a href="#" id="whatsapp-link" target="_blank" class="action-btn btn-whatsapp">💬 استفسر عبر واتساب</a>
             </div>
         </div>
-
-        <!-- 4. شاشة مركز المكافآت Rewards Center -->
-        <div class="screen" id="rewardsScreen">
-            <h2 class="main-title">Rewards Center</h2>
-            <div class="glass-card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;"><span style="font-weight:700;">Daily Check-in</span><span style="color:var(--accent-gold);">Day 3 of 7</span></div>
-                <div class="checkin-row">
-                    <div class="day-box claimed"><i class="fas fa-check"></i><span>Mon</span></div>
-                    <div class="day-box claimed"><i class="fas fa-check"></i><span>Tue</span></div>
-                    <div class="day-box active"><span>+20</span><span>Wed</span></div>
-                    <div class="day-box"><span>+10</span><span>Thu</span></div>
-                    <div class="day-box"><span>+10</span><span>Fri</span></div>
-                    <div class="day-box"><span>+50</span><span>Sat</span></div>
-                </div>
-                <button class="btn-prime" style="background:var(--accent-gradient); color:#000;" onclick="claimDailyReward()">Claim Daily Reward</button>
-            </div>
-
-            <h4 style="font-size:14px; color:var(--text-sub); margin-bottom:12px;">Daily Tasks</h4>
-            <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px;">
-                <div><h5 style="font-size:13px; font-weight:700;">Watch 5 Episodes</h5><p style="font-size:11px; color:var(--neon-blue);">+50 Coins</p></div>
-                <button class="btn-prime" style="width:auto; margin:0; padding:6px 16px; font-size:12px; border-radius:8px;" onclick="switchInternalScreen('discoveryScreen', 1)">Go</button>
-            </div>
-        </div>
-
-        <!-- 5. شاشة متجر شحن العملات Coin Store -->
-        <div class="screen" id="storeScreen">
-            <h2 class="main-title">Coin Store</h2>
-            <div class="pack-grid">
-                <div class="pack-card" onclick="buyPackage(100)">
-                    <i class="fas fa-coins"></i><div class="pack-amount">100 Coins</div><div class="pack-bonus">Bonus: 0</div><span class="pack-price">$0.99</span>
-                </div>
-                <div class="pack-card" onclick="buyPackage(500)">
-                    <i class="fas fa-coins"></i><div class="pack-amount">500 Coins</div><div class="pack-bonus">Bonus: +50</div><span class="pack-price">$4.99</span>
-                </div>
-                <div class="pack-card" onclick="buyPackage(1200)">
-                    <div class="tag-popular">POPULAR</div>
-                    <i class="fas fa-box-open"></i><div class="pack-amount">1,200 Coins</div><div class="pack-bonus">Bonus: +150</div><span class="pack-price">$9.99</span>
-                </div>
-                <div class="pack-card" onclick="buyPackage(6000)">
-                    <i class="fas fa-gem"></i><div class="pack-amount">6,000 Coins</div><div class="pack-bonus">Bonus: +1,200</div><span class="pack-price">$49.99</span>
-                </div>
-            </div>
-            <div class="btn-ghost" style="margin-top:20px; text-align:center; width:100%;">Restore Purchases</div>
-        </div>
-
-        <!-- 6. شاشة الـ Paywall وقفل الحلقات (Episode Unlock) -->
-        <div class="screen" id="paywallScreen" style="padding-top:140px;">
-            <div class="glass-card" style="margin-top:auto;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <i class="fas fa-lock" style="font-size:32px; color:var(--accent-gold); margin-bottom:10px;"></i>
-                    <h3 style="font-size:16px; font-weight:700;">Episode 12: The Betrayal</h3>
-                    <p style="color:var(--text-sub); font-size:12px;">The Billionaire's Secret Heir · Season 1</p>
-                </div>
-                <div class="paywall-option" id="opt1" onclick="selectPaywallOption('opt1', 20)">
-                    <div><h4 style="font-size:13px; font-weight:700;">Unlock this episode</h4><p style="font-size:11px; color:var(--text-sub);">One-time access to this episode</p></div>
-                    <span style="font-weight:700; color:var(--accent-gold);">20 🪙</span>
-                </div>
-                <div class="paywall-option selected" id="opt2" onclick="selectPaywallOption('opt2', 480)">
-                    <div><h4 style="font-size:13px; font-weight:700;">Unlock all remaining</h4><p style="font-size:11px; color:var(--neon-blue);">Get 20% off for the full series</p></div>
-                    <span style="font-weight:700; color:var(--accent-gold);">480 🪙</span>
-                </div>
-                <button class="btn-prime" style="margin-top:15px;" onclick="confirmUnlockEpisode()">Confirm & Unlock</button>
-                <div class="btn-ghost" style="width:100%; text-align:center;" onclick="switchInternalScreen('rewardsScreen', 2)">Earn Free Coins Instead</div>
-            </div>
-        </div>
-
-        <!-- شريط التنقل السفلي الاحترافي الثابت للـ 4 شاشات الأساسية -->
-        <div class="bottom-nav" id="mainNavigation" style="display:none;">
-            <div class="nav-item active" onclick="switchInternalScreen('feedScreen', this)"><i class="fas fa-home"></i><span>الرئيسية</span></div>
-            <div class="nav-item" onclick="switchInternalScreen('discoveryScreen', this)"><i class="fas fa-compass"></i><span>استكشف</span></div>
-            <div class="nav-item" onclick="switchInternalScreen('rewardsScreen', this)"><i class="fas fa-gift"></i><span>المكافآت</span></div>
-            <div class="nav-item" onclick="switchInternalScreen('storeScreen', this)"><i class="fas fa-store"></i><span>المتجر</span></div>
-        </div>
-
     </div>
 
-    <!-- العقل البرمجي والـ Logic الذكي لإدارة المحفظة والتنقل -->
-    <script>
-        let walletBalance = 1250; // رصيد العملات المأخوذ من كود الـ UI الافتراضي بتاعك
-        let selectedPrice = 480;   // الخيار المالي التلقائي في الـ Paywall
+    <div id="lightbox-overlay" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="معاينة واضحة بالكامل">
+    </div>
 
-        function updateHUD() {
-            document.getElementById('coinCountHUD').innerText = walletBalance.toLocaleString();
-        }
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+        // دمج Firebase لحفظ إضافات الخرائط للأبد
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        function switchInternalScreen(screenId, navElement) {
-            // إخفاء كل الشاشات بنظام الأنيميشن الناعم
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(screenId).classList.add('active-screen');
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN5AKTo3Ojfh3Dx78sSa3nglhNXDpCx_8",
+            authDomain: "hadayek-realestate.firebaseapp.com",
+            projectId: "hadayek-realestate",
+            storageBucket: "hadayek-realestate.firebasestorage.app",
+            messagingSenderId: "889853758510",
+            appId: "1:889853758510:web:8144e5362f788363a0e3bf"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-            // إظهار شريط التنقل السفلي فقط بعد تخطي شاشة الـ Onboarding
-            if (screenId !== 'onboardingScreen') {
-                document.getElementById('mainNavigation').style.display = 'flex';
+        const map = L.map('map').setView([29.9730, 31.1150], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let adminMode = false;
+        let tempMarker = null;
+        let currentTempCoords = null;
+        let isEditingExisting = false;
+        let editingBuildingId = null;
+
+        let currentSidebarBuildingImages = [];
+        let currentSidebarAptImagesMap = {}; 
+        let currentSelectedBuilding = null;
+        
+        let allBuildings = [];
+        let firstLoad = true;
+
+        let currentSalesData = { name: "خدمة العملاء", phone: "01000000000", whatsapp: "201000000000" };
+
+        // جلب عمارات الخريطة من قاعدة البيانات
+        onSnapshot(collection(db, 'map_buildings'), (snap) => {
+            allBuildings = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            window.renderMarkers();
+            
+            if(firstLoad) {
+                window.checkUrlParametersAndRedirect();
+                firstLoad = false;
             }
+        });
 
-            // تحديث حالة الأزرار السفلية النشطة لو كان التنقل من الشريط
-            if (navElement !== undefined && typeof navElement === 'object') {
-                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                navElement.classList.add('active');
-            } else if (typeof navElement === 'number') {
-                // لو التنقل تم برمجياً من زرار داخلي، ننشط الأيقونة المقابلة في الشريط
-                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                if (navElement >= 0) document.querySelectorAll('.nav-item')[navElement].classList.add('active');
-            }
-        }
+        window.viewImageInLightbox = (src) => {
+            const lightbox = document.getElementById('lightbox-overlay');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = src;
+            lightbox.style.display = 'flex';
+        };
+        window.closeLightbox = () => { document.getElementById('lightbox-overlay').style.display = 'none'; };
 
-        // تفاعل اللايك الفخم في الـ Video Feed
-        let feedLiked = false;
-        function toggleFeedLike() {
-            feedLiked = !feedLiked;
-            const heart = document.getElementById('feedHeart');
-            const count = document.getElementById('feedLikeCount');
-            if (feedLiked) {
-                heart.style.color = '#ff3b30'; heart.className = "fas fa-heart";
-                count.innerText = "1.3M";
+        window.renderMarkers = () => {
+            map.eachLayer(function (layer) { if (layer instanceof L.Marker && layer !== tempMarker) map.removeLayer(layer); });
+            allBuildings.forEach((b) => {
+                const marker = L.marker(b.coords).addTo(map);
+                marker.bindTooltip(b.name, { permanent: true, direction: 'top' });
+                marker.on('click', function() { 
+                    if(!adminMode) window.openBuildingModal(b); 
+                    else window.openAdminEditSidebar(b);
+                });
+            });
+        };
+
+        window.toggleAdminMode = () => {
+            adminMode = !adminMode;
+            const btn = document.getElementById('admin-toggle-btn');
+            if(adminMode) {
+                btn.innerText = "🛑 إلغاء وضع التعديل";
+                btn.classList.add('btn-admin-active');
+                alert("وضع التحكم شغال:\n- لإضافة عمارة: اضغط على أي مكان فارغ في الخريطة.\n- لتعديل عمارة أو حذفها: اضغط على دبوس العمارة مباشرة.");
             } else {
-                heart.style.color = '#fff'; heart.className = "fas fa-heart";
-                count.innerText = "1.2M";
+                btn.innerText = "🔧 وضع التعديل وإضافة العماير";
+                btn.classList.remove('btn-admin-active');
+                window.closeAdminSidebar();
             }
-        }
+        };
 
-        // سيستم الـ Paywall والخصم الذكي للحلقات
-        function selectPaywallOption(optId, price) {
-            document.querySelectorAll('.paywall-option').forEach(o => o.classList.remove('selected'));
-            document.getElementById(optId).classList.add('selected');
-            selectedPrice = price;
-        }
+        map.on('click', function(e) {
+            if (!adminMode) return;
+            isEditingExisting = false;
+            editingBuildingId = null;
+            currentTempCoords = [e.latlng.lat, e.latlng.lng];
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker(currentTempCoords).addTo(map);
 
-        function confirmUnlockEpisode() {
-            if (walletBalance >= selectedPrice) {
-                walletBalance -= selectedPrice;
-                updateHUD();
-                alert('🔓 تم فتح العرض بنجاح! استمتع بمشاهدة الحلقة 12 الحصرية الآن.');
-                switchInternalScreen('feedScreen', 0);
+            document.getElementById('admin-sidebar-title').innerText = "➕ إضافة عمارة جديدة";
+            document.getElementById('form-b-name').value = '';
+            document.getElementById('form-b-desc').value = '';
+            document.getElementById('form-b-status').value = 'مبنية';
+            document.getElementById('form-b-delivery').value = '';
+            document.getElementById('form-b-delivery-group').style.display = 'none';
+            document.getElementById('b-images-preview').innerHTML = '';
+            document.getElementById('form-floors-container').innerHTML = '';
+            document.getElementById('sidebar-delete-btn').style.display = 'none';
+            currentSidebarBuildingImages = [];
+            currentSidebarAptImagesMap = {};
+            document.getElementById('admin-sidebar').style.display = 'block';
+        });
+
+        window.openAdminEditSidebar = (b) => {
+            isEditingExisting = true;
+            editingBuildingId = b.id;
+            currentTempCoords = b.coords;
+
+            document.getElementById('admin-sidebar-title').innerText = `📝 تعديل بيانات: ${b.name}`;
+            document.getElementById('form-b-name').value = b.name;
+            document.getElementById('form-b-desc').value = b.locationDesc;
+            document.getElementById('form-b-status').value = b.buildingStatus || 'مبنية';
+            document.getElementById('form-b-delivery').value = b.deliveryDate || '';
+            window.toggleBuildingDeliveryInput(b.buildingStatus || 'مبنية');
+
+            currentSidebarBuildingImages = b.images || [];
+            const bPreview = document.getElementById('b-images-preview');
+            bPreview.innerHTML = '';
+            currentSidebarBuildingImages.forEach(src => { bPreview.innerHTML += `<img src="${src}"/>`; });
+
+            const container = document.getElementById('form-floors-container');
+            container.innerHTML = '';
+            currentSidebarAptImagesMap = {};
+
+            const floorsMap = {};
+            b.apartments.forEach(apt => {
+                if(!floorsMap[apt.floor]) floorsMap[apt.floor] = [];
+                floorsMap[apt.floor].push(apt);
+            });
+
+            let fIndex = 0;
+            for(let floorName in floorsMap) {
+                fIndex++;
+                const floorId = `floor-${fIndex}`;
+                const floorHtml = `
+                    <div class="nested-box" id="${floorId}">
+                        <button class="delete-icon-btn" style="position:absolute; top:10px; left:10px;" onclick="window.removeFloorElement('${floorId}')">❌ حذف الدور</button>
+                        <label>الدور:</label><input type="text" class="floor-name-input" value="${floorName}">
+                        <div class="apts-box"></div>
+                        <button class="btn" style="font-size:12px; margin-top:5px; background:#0284c7; width:100%;" onclick="window.addAptForm('${floorId}')">➕ إضافة شقة في هذا الدور</button>
+                    </div>`;
+                container.insertAdjacentHTML('beforeend', floorHtml);
+
+                const aptsBox = document.getElementById(floorId).querySelector('.apts-box');
+                floorsMap[floorName].forEach(apt => {
+                    let aptUid = apt.id || `uid-${Math.random()}`;
+                    currentSidebarAptImagesMap[aptUid] = apt.images || [];
+                    const aptHtml = `
+                        <div class="apt-edit-box" id="${aptUid}">
+                            <button class="delete-icon-btn" style="position:absolute; top:5px; left:5px;" onclick="this.parentElement.remove()">❌ حذف الشقة</button>
+                            <label style="font-size:10px;">كود الشقة (يطابق الانفنتوري):</label>
+                            <input type="text" class="apt-id-input" placeholder="الكود (مثال: A1)" value="${aptUid}" style="margin-bottom:4px;">
+                            <input type="text" class="apt-size" placeholder="المساحة" value="${apt.size}">
+                            <input type="text" class="apt-price" placeholder="السعر" value="${apt.price}" style="margin-top:4px;">
+                            <input type="text" class="apt-view" placeholder="الإطلالة" value="${apt.view}" style="margin-top:4px;">
+                            <input type="text" class="apt-rooms" placeholder="التقسيم والغرف" value="${apt.rooms}" style="margin-top:4px;">
+                            <input type="text" class="apt-payment" placeholder="نظام السداد" value="${apt.payment}" style="margin-top:4px;">
+                            <input type="file" multiple accept="image/*" onchange="window.saveAptImages(this, '${aptUid}')" style="margin-top:4px;">
+                            <div class="image-preview">${(apt.images || []).map(img => `<img src="${img}"/>`).join('')}</div>
+                        </div>`;
+                    aptsBox.insertAdjacentHTML('beforeend', aptHtml);
+                });
+            }
+
+            const delBtn = document.getElementById('sidebar-delete-btn');
+            delBtn.style.display = 'block';
+            delBtn.onclick = async function() {
+                if(confirm(`هل أنت متأكد من حذف عمارة ${b.name} تماماً من قاعدة البيانات؟`)) {
+                    await deleteDoc(doc(db, 'map_buildings', editingBuildingId.toString()));
+                    window.closeAdminSidebar();
+                }
+            };
+            document.getElementById('admin-sidebar').style.display = 'block';
+        };
+
+        window.toggleBuildingDeliveryInput = (val) => { document.getElementById('form-b-delivery-group').style.display = val === 'تحت_الإنشاء' ? 'block' : 'none'; };
+        
+        let floorCount = 600;
+        window.addFloorForm = () => {
+            floorCount++;
+            const container = document.getElementById('form-floors-container');
+            const floorId = `floor-${floorCount}`;
+            const html = `
+                <div class="nested-box" id="${floorId}">
+                    <button class="delete-icon-btn" style="position:absolute; top:10px; left:10px;" onclick="window.removeFloorElement('${floorId}')">❌ حذف الدور</button>
+                    <label>الدور:</label><input type="text" class="floor-name-input" placeholder="مثال: الدور الثالث">
+                    <div class="apts-box"></div>
+                    <button class="btn" style="font-size:12px; margin-top:5px; background:#0284c7; width:100%;" onclick="window.addAptForm('${floorId}')">➕ إضافة شقة في هذا الدور</button>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            window.addAptForm(floorId);
+        };
+
+        window.removeFloorElement = (id) => { document.getElementById(id).remove(); };
+
+        let aptCount = 600;
+        window.addAptForm = (floorId) => {
+            aptCount++;
+            const box = document.getElementById(floorId).querySelector('.apts-box');
+            const aptUid = `A${aptCount}`;
+            currentSidebarAptImagesMap[aptUid] = [];
+            const html = `
+                <div class="apt-edit-box" id="${aptUid}">
+                    <button class="delete-icon-btn" style="position:absolute; top:5px; left:5px;" onclick="this.parentElement.remove()">❌ حذف الشقة</button>
+                    <label style="font-size:10px;">كود الشقة (يطابق الانفنتوري):</label>
+                    <input type="text" class="apt-id-input" placeholder="الكود (مثال: A1)" value="${aptUid}" style="margin-bottom:4px;">
+                    <input type="text" class="apt-size" placeholder="المساحة: 125 متر" style="margin-top:4px;">
+                    <input type="text" class="apt-price" placeholder="السعر الإجمالي: 2000000" style="margin-top:4px;">
+                    <input type="text" class="apt-view" placeholder="الإطلالة: واجهة" style="margin-top:4px;">
+                    <input type="text" class="apt-rooms" placeholder="التقسيم: 3 غرف" style="margin-top:4px;">
+                    <input type="text" class="apt-payment" placeholder="نظام السداد: 18 شهر" style="margin-top:4px;">
+                    <input type="file" multiple accept="image/*" onchange="window.saveAptImages(this, '${aptUid}')" style="margin-top:4px; width:100%;">
+                    <div class="image-preview"></div>
+                </div>`;
+            box.insertAdjacentHTML('beforeend', html);
+        };
+
+        window.handleBuildingImages = (input) => {
+            if(input.files) {
+                Array.from(input.files).forEach(f => {
+                    const r = new FileReader();
+                    r.onload = (e) => {
+                        currentSidebarBuildingImages.push(e.target.result);
+                        const img = document.createElement('img'); img.src = e.target.result;
+                        document.getElementById('b-images-preview').appendChild(img);
+                    };
+                    r.readAsDataURL(f);
+                });
+            }
+        };
+
+        window.saveAptImages = (input, uid) => {
+            const preview = input.nextElementSibling;
+            if(input.files) {
+                Array.from(input.files).forEach(f => {
+                    const r = new FileReader();
+                    r.onload = (e) => {
+                        if(!currentSidebarAptImagesMap[uid]) currentSidebarAptImagesMap[uid] = [];
+                        currentSidebarAptImagesMap[uid].push(e.target.result);
+                        const img = document.createElement('img'); img.src = e.target.result;
+                        preview.appendChild(img);
+                    };
+                    r.readAsDataURL(f);
+                });
+            }
+        };
+
+        window.saveBuildingFromSidebar = async () => {
+            const name = document.getElementById('form-b-name').value;
+            const desc = document.getElementById('form-b-desc').value;
+            const bStatus = document.getElementById('form-b-status').value;
+            const bDelivery = document.getElementById('form-b-delivery').value;
+            if(!name) return alert("اكتب اسم العمارة!");
+
+            const apartments = [];
+            document.querySelectorAll('.nested-box').forEach(fb => {
+                const fName = fb.querySelector('.floor-name-input').value || "غير محدد";
+                fb.querySelectorAll('.apt-edit-box').forEach(ab => {
+                    let aptIdVal = ab.querySelector('.apt-id-input').value || ab.id;
+                    apartments.push({
+                        id: aptIdVal, 
+                        floor: fName,
+                        size: ab.querySelector('.apt-size').value || "غير محدد",
+                        price: ab.querySelector('.apt-price').value || "غير محدد",
+                        view: ab.querySelector('.apt-view').value || "غير محدد",
+                        rooms: ab.querySelector('.apt-rooms').value || "غير محدد",
+                        payment: ab.querySelector('.apt-payment').value || "غير محدد",
+                        images: currentSidebarAptImagesMap[ab.id] || []
+                    });
+                });
+            });
+
+            const buildingData = {
+                name, coords: currentTempCoords, locationDesc: desc,
+                buildingStatus: bStatus, deliveryDate: bDelivery, 
+                images: currentSidebarBuildingImages, apartments
+            };
+
+            let targetId = isEditingExisting ? editingBuildingId.toString() : Date.now().toString();
+            await setDoc(doc(db, 'map_buildings', targetId), buildingData);
+            
+            alert("تم حفظ بيانات العمارة في السيرفر بنجاح!");
+            if(tempMarker) map.removeLayer(tempMarker);
+            tempMarker = null;
+            window.toggleAdminMode();
+        };
+
+        window.openBuildingModal = (b) => {
+            currentSelectedBuilding = b;
+            document.getElementById('modal-b-name').innerText = b.name;
+            document.getElementById('modal-b-loc').innerText = "📍 " + b.locationDesc;
+            document.getElementById('modal-b-desc-box').innerHTML = `<strong>نظرة عامة:</strong> عمارة متميزة بموقع استراتيجي في ${b.locationDesc}.`;
+            
+            const statusZone = document.getElementById('modal-b-status-zone');
+            if(b.buildingStatus === 'مبنية') {
+                statusZone.innerHTML = `<span class="status-ready">جاهزة للاستلام الفوري 🔑</span>`;
             } else {
-                alert('❌ رصيدك الحالي غير كافٍ لشراء هذا الخيار. سيتم تحويلك لمتجر الشحن الآن.');
-                switchInternalScreen('storeScreen', 3);
+                statusZone.innerHTML = `<span class="status-construction">تحت الإنشاء 🏗️</span><p style="font-size:12px; margin-top:4px; color:#c2410c; font-weight:bold;">📅 التسليم: ${b.deliveryDate || 'قريباً'}</p>`;
             }
-        }
 
-        // شحن فوري من المتجر
-        function buyPackage(amount) {
-            walletBalance += amount;
-            updateHUD();
-            alert('🪙 مبروك! تم إضافة ' + amount + ' عملة إلى محفظتك بنجاح.');
-        }
-
-        // استلام مكافأة تسجيل الدخول اليومي
-        let claimedToday = false;
-        function claimDailyReward() {
-            if (claimedToday) {
-                alert('لقد قمت باستلام مكافأة اليوم بالفعل! عد غداً للمزيد من الأرباح 🪙');
-                return;
+            const gallery = document.getElementById('modal-b-gallery');
+            gallery.innerHTML = '';
+            if(b.images && b.images.length > 0) {
+                b.images.forEach(img => { gallery.innerHTML += `<img src="${img}" onclick="window.viewImageInLightbox('${img}')"/>`; });
+            } else {
+                gallery.innerHTML = '<p style="color:#94a3b8; font-size:12px;">📸 لم يتم رفع صور للواجهة حالياً.</p>';
             }
-            walletBalance += 20;
-            updateHUD();
-            claimedToday = true;
-            alert('🎉 تم استلام 20 عملة مجانية مكافأة الحضور اليومي!');
-        }
+
+            const floorsList = document.getElementById('modal-floors-list');
+            floorsList.innerHTML = '';
+            const uniqueFloors = [...new Set(b.apartments.map(a => a.floor))];
+            uniqueFloors.forEach(floorName => {
+                floorsList.innerHTML += `<button class="floor-btn" onclick="window.selectFloor('${floorName}')">🏢 ${floorName}</button>`;
+            });
+
+            document.getElementById('floors-section').classList.remove('fade-out');
+            document.getElementById('sizes-section').classList.add('fade-out');
+            document.getElementById('building-modal').classList.add('active');
+        };
+
+        window.selectFloor = (floorName) => {
+            document.getElementById('selected-floor-title').innerText = `المساحات المتاحة في (${floorName}):`;
+            const sizesList = document.getElementById('modal-sizes-list');
+            sizesList.innerHTML = '';
+
+            const filteredApts = currentSelectedBuilding.apartments.filter(a => a.floor === floorName);
+            filteredApts.forEach(apt => {
+                sizesList.innerHTML += `
+                    <div class="size-card" onclick="window.openApartmentModal(${JSON.stringify(apt).replace(/"/g, '&quot;')})">
+                        <div>
+                            <strong style="font-size:18px; color:#1e3a8a;">📐 مساحة ${apt.size}</strong>
+                            <p style="font-size:13px; color:#64748b; margin-top:4px;">👁️ الإطلالة: ${apt.view}</p>
+                        </div>
+                        <span class="price-badge">${apt.price}</span>
+                    </div>`;
+            });
+
+            document.getElementById('floors-section').classList.add('fade-out');
+            const sizesSection = document.getElementById('sizes-section');
+            sizesSection.classList.remove('fade-out');
+            sizesSection.classList.add('fade-in');
+        };
+
+        window.openApartmentModal = (apt) => {
+            document.getElementById('apt-modal-title').innerText = `🏢 تفاصيل شقة بمساحة ${apt.size}`;
+            document.getElementById('apt-modal-view').innerText = apt.view;
+            document.getElementById('apt-modal-rooms').innerText = apt.rooms;
+            document.getElementById('apt-modal-price').innerText = `السعر الإجمالي: ${apt.price}`;
+            document.getElementById('apt-modal-payment').innerText = `💳 نظام السداد العادي: ${apt.payment}`;
+            
+            const gallery = document.getElementById('apt-modal-gallery');
+            gallery.innerHTML = '';
+            if(apt.images && apt.images.length > 0) {
+                apt.images.forEach(img => { gallery.innerHTML += `<img src="${img}" onclick="window.viewImageInLightbox('${img}')"/>`; });
+            } else {
+                gallery.innerHTML = '<p style="color:#94a3b8; font-size:12px;">📸 لم يتم رفع صور داخلية للشقة بعد.</p>';
+            }
+
+            // 🎯 السحر هنا: لو اللينك جي من الـ Inventory وفيه Parameters، هنعرضها!
+            const urlParams = new URLSearchParams(window.location.search);
+            const customPaymentZone = document.getElementById('custom-payment-zone');
+            
+            // لو العميل فاتح اللينك المخصص بتاع الشقة دي تحديداً
+            if(urlParams.has('total') && urlParams.get('code') === apt.id) {
+                document.getElementById('apt-modal-payment').style.display = 'none'; // نخفي النظام العادي
+                customPaymentZone.style.display = 'block'; // ونظهر الحسبة المخصوصة
+                
+                document.getElementById('view-total-price').innerText = `إجمالي الوحدة: ${Number(urlParams.get('total')).toLocaleString()} ج.م`;
+                document.getElementById('view-down-payment').innerText = `المقدم المطلوب: ${Number(urlParams.get('down')).toLocaleString()} ج.م`;
+                document.getElementById('view-monthly-installment').innerText = `القسط الشهري: ${Number(urlParams.get('monthly')).toLocaleString()} ج.م`;
+                document.getElementById('view-months-count').innerText = `فترة السداد: ${urlParams.get('months')} شهر`;
+            } else {
+                document.getElementById('apt-modal-payment').style.display = 'inline-block';
+                customPaymentZone.style.display = 'none';
+            }
+
+            // تحديث زراير الاتصال بالرقم اللي جي في اللينك
+            document.getElementById('sidebar-call-btn').href = `tel:${currentSalesData.phone}`;
+            document.getElementById('whatsapp-link').href = `https://wa.me/${currentSalesData.whatsapp}?text=أهلاً أستاذ ${currentSalesData.name}، أنا شفت كود الشقة (${apt.id}) مساحة ${apt.size} في عمارة ${currentSelectedBuilding.name} على الخريطة ومهتم بالتفاصيل.`;
+
+            document.getElementById('apartment-modal').classList.add('active');
+        };
+
+        // 🚀 القارئ الذكي للينك اللي هيوجه الخريطة فوراً للعميل
+        window.checkUrlParametersAndRedirect = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('sales_name')) {
+                currentSalesData.name = urlParams.get('sales_name');
+                currentSalesData.phone = urlParams.get('sales_phone') || "01000000000";
+                currentSalesData.whatsapp = urlParams.get('sales_ws') || "201000000000";
+                
+                const badge = document.getElementById('sales-badge-info');
+                badge.innerText = `👤 المستشار العقاري: ${currentSalesData.name}`;
+                badge.style.display = 'inline-block';
+            }
+
+            if(urlParams.has('area')) {
+                const targetArea = urlParams.get('area');
+                const targetCode = urlParams.get('code');
+                
+                const bObj = allBuildings.find(b => b.name === targetArea);
+                if(bObj) {
+                    // تحريك الخريطة سينمائياً
+                    map.flyTo(bObj.coords, 18, { animate: true, duration: 2 });
+                    
+                    // بعد الوصول، نفتح كارت العمارة ثم كارت الشقة
+                    setTimeout(() => {
+                        window.openBuildingModal(bObj);
+                        const aptObj = bObj.apartments.find(a => a.id === targetCode);
+                        if(aptObj) {
+                            setTimeout(() => { window.openApartmentModal(aptObj); }, 800);
+                        }
+                    }, 2200);
+                }
+            }
+        };
+
+        window.goBackToFloors = () => { document.getElementById('sizes-section').classList.add('fade-out'); const fs = document.getElementById('floors-section'); fs.classList.remove('fade-out'); fs.classList.add('fade-in'); };
+        window.closeBuildingModal = () => { document.getElementById('building-modal').classList.remove('active'); };
+        window.closeApartmentModal = () => { document.getElementById('apartment-modal').classList.remove('active'); };
+        window.closeModal = (modal, e) => { if(e.target === modal) modal.classList.remove('active'); };
+        window.closeAdminSidebar = () => { document.getElementById('admin-sidebar').style.display = 'none'; if(tempMarker) map.removeLayer(tempMarker); tempMarker = null; };
+
     </script>
-
 </body>
 </html>
